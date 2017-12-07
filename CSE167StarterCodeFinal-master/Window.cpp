@@ -1,4 +1,3 @@
-
 #ifndef STB_IMAGE_IMPLEMENTATION    
 #define STB_IMAGE_IMPLEMENTATION    
 #include "stb_image.h"
@@ -13,98 +12,31 @@
 #include <random>
 
 #include "shader.h"
-#include "Cube.h"
-#include "OBJObject.h"
+#include "SkyboxColorGen.h"
+#include "TerrainColorGen.h"
+#include "SphereGen.h"
+#include "TerrainGen.h"
+#include "Terrain.h"
+#include "LowPolyOBJ.h"
+
 
 using namespace std;
 
 #pragma region Old Declarations
 
-// replace the following images with out new skybox images
-vector<std::string> faces
-{
-	"glacier_ft.tga",
-	"glacier_bk.tga",
-	"glacier_up.tga",
-	"glacier_dn.tga",
-	"glacier_rt.tga",
-	"glacier_lf.tga"
-};
-
-float skyboxVertices[] = {
-	// positions          
-	-1.0f,  1.0f, -1.0f,
-	-1.0f, -1.0f, -1.0f,
-	1.0f, -1.0f, -1.0f,
-	1.0f, -1.0f, -1.0f,
-	1.0f,  1.0f, -1.0f,
-	-1.0f,  1.0f, -1.0f,
-
-	-1.0f, -1.0f,  1.0f,
-	-1.0f, -1.0f, -1.0f,
-	-1.0f,  1.0f, -1.0f,
-	-1.0f,  1.0f, -1.0f,
-	-1.0f,  1.0f,  1.0f,
-	-1.0f, -1.0f,  1.0f,
-
-	1.0f, -1.0f, -1.0f,
-	1.0f, -1.0f,  1.0f,
-	1.0f,  1.0f,  1.0f,
-	1.0f,  1.0f,  1.0f,
-	1.0f,  1.0f, -1.0f,
-	1.0f, -1.0f, -1.0f,
-
-	-1.0f, -1.0f,  1.0f,
-	-1.0f,  1.0f,  1.0f,
-	1.0f,  1.0f,  1.0f,
-	1.0f,  1.0f,  1.0f,
-	1.0f, -1.0f,  1.0f,
-	-1.0f, -1.0f,  1.0f,
-
-	-1.0f,  1.0f, -1.0f,
-	1.0f,  1.0f, -1.0f,
-	1.0f,  1.0f,  1.0f,
-	1.0f,  1.0f,  1.0f,
-	-1.0f,  1.0f,  1.0f,
-	-1.0f,  1.0f, -1.0f,
-
-	-1.0f, -1.0f, -1.0f,
-	-1.0f, -1.0f,  1.0f,
-	1.0f, -1.0f, -1.0f,
-	1.0f, -1.0f, -1.0f,
-	-1.0f, -1.0f,  1.0f,
-	1.0f, -1.0f,  1.0f
-};
-
-
 const char* window_title = "GLFW Starter Project";
-
 
 GLint skyboxShaderProgram;
 
-GLuint skyboxVAO, skyboxVBO;
+GLuint shader;
+
+Terrain * island;
 
 // On some systems you need to change this to the absolute path
-#define VERTEX_SHADER_PATH "../Shaders/curveShader.vert"
-#define FRAGMENT_SHADER_PATH "../Shaders/curveShader.frag"
-
-#define SKYBOX_VERTEX_SHADER_PATH "../Shaders/skyboxShader.vert"
-#define SKYBOX_FRAGMENT_SHADER_PATH "../Shaders/skyboxShader.frag"
-
-#define ANCHOR_VERTEX_SHADER_PATH "../Shaders/anchorShader.vert"
-#define ANCHOR_FRAGMENT_SHADER_PATH "../Shaders/anchorShader.frag"
-
-#define CONTROL_VERTEX_SHADER_PATH "../Shaders/controlShader.vert"
-#define CONTROL_FRAGMENT_SHADER_PATH "../Shaders/controlShader.frag"
-
-#define TANGENT_VERTEX_SHADER_PATH "../Shaders/tangentShader.vert"
-#define TANGENT_FRAGMENT_SHADER_PATH "../Shaders/tangentShader.frag"
-
-#define SELECTION_VERTEX_SHADER_PATH "../Shaders/selectionShader.vert"
-#define SELECTION_FRAGMENT_SHADER_PATH "../Shaders/selectionShader.frag"
-
-#define REFLECTION_VERTEX_SHADER_PATH "../Shaders/reflectionShader.vert"
-#define REFLECTION_FRAGMENT_SHADER_PATH "../Shaders/reflectionShader.frag"
+const char * shaderPath[] = {
+  "./LowPoly.vert",
+  "./LowPoly.frag",
+};
 
 // Default camera parameters
 glm::vec3 Window::cam_pos(0.0f, 0.0f, 150.0f);		// e  | Position of camera
@@ -121,80 +53,18 @@ double Window::old_ypos;
 glm::mat4 Window::P;
 glm::mat4 Window::V;
 
-GLint Window::shaderProgram;
-GLint Window::anchorShaderProgram;
-GLint Window::controlShaderProgram;
-GLint Window::tangentShaderProgram;
-GLint Window::selectionShaderProgram;
-GLint Window::reflectionShaderProgram;
-
-unsigned int Window::cubemapTexture;
-
 #pragma endregion
-
-bool hide_sky_box = false;
-
-
-unsigned int loadCubemap(vector<std::string> faces);
-void draw_skybox();
-
 
 void Window::initialize_objects()
 {
-
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
-
-	skyboxShaderProgram = LoadShaders(SKYBOX_VERTEX_SHADER_PATH, SKYBOX_FRAGMENT_SHADER_PATH);
-	anchorShaderProgram = LoadShaders(ANCHOR_VERTEX_SHADER_PATH, ANCHOR_FRAGMENT_SHADER_PATH);
-	controlShaderProgram = LoadShaders(CONTROL_VERTEX_SHADER_PATH, CONTROL_FRAGMENT_SHADER_PATH);
-	tangentShaderProgram = LoadShaders(TANGENT_VERTEX_SHADER_PATH, TANGENT_FRAGMENT_SHADER_PATH);
-	selectionShaderProgram = LoadShaders(SELECTION_VERTEX_SHADER_PATH, SELECTION_FRAGMENT_SHADER_PATH);
-	reflectionShaderProgram = LoadShaders(REFLECTION_VERTEX_SHADER_PATH, REFLECTION_FRAGMENT_SHADER_PATH);
-
-	// load the skybox
-	cubemapTexture = loadCubemap(faces);
-
-	glGenVertexArrays(1, &skyboxVAO);
-	glGenBuffers(1, &skyboxVBO);
-
-	glBindVertexArray(skyboxVAO);
-	glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
-
-	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), skyboxVertices, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-
-	glVertexAttribPointer(0,// This first parameter x should be the same as the number passed into the line "layout (location = x)" in the vertex shader. In this case, it's 0. Valid values are 0 to GL_MAX_UNIFORM_LOCATIONS.
-		3, // This second line tells us how any components there are per vertex. In this case, it's 3 (we have an x, y, and z component)
-		GL_FLOAT, // What type these components are
-		GL_FALSE, // GL_TRUE means the values should be normalized. GL_FALSE means they shouldn't
-		3 * sizeof(GLfloat), // Offset between consecutive indices. Since each of our vertices have 3 floats, they should have the size of 3 floats in between
-		(GLvoid*)0); // Offset of the first vertex's component. In our case it's 0 since we don't pad the vertices array with anything.
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-
-#pragma region OldRegion
-
-	// initialize mouse condition
-	right_mouse_on = false;
-	left_mouse_on = false;
-	// initialize mouse position
-	old_xpos = -99999;
-	old_ypos = -99999;
-
-	// Load the shader program. Make sure you have the correct filepath up top
-	Window::shaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
-
-#pragma endregion
-
+  shader = LoadShaders(shaderPath[0], shaderPath[1]);
+  island = new Terrain(20, 1, TerrainGen::getHeight, SphereGen::getHeightLower, TerrainColorGen::getColor);
 }
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
 void Window::clean_up()
 {
 	//if (toDisplay != NULL) delete(toDisplay);
-	glDeleteProgram(Window::shaderProgram);
 }
 
 GLFWwindow* Window::create_window(int width, int height)
@@ -289,7 +159,6 @@ void Window::cursor_pos_callback(GLFWwindow* window, double xpos, double ypos) {
 
 	old_xpos = xpos;
 	old_ypos = ypos;
-
 }
 
 
@@ -345,29 +214,6 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 void Window::idle_callback()
 {
 	// if we updating the sphere location
-
-}
-
-
-
-void draw_skybox() {
-
-	// use skybox shader????
-	glUseProgram(skyboxShaderProgram);
-
-	glDepthMask(GL_FALSE);
-	glm::mat4 view = glm::mat4(glm::mat3(Window::V));
-	// Now send these values to the shader program
-	glUniformMatrix4fv(glGetUniformLocation(skyboxShaderProgram, "projection"), 1, GL_FALSE, &Window::P[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(skyboxShaderProgram, "view"), 1, GL_FALSE, &view[0][0]);
-	glBindVertexArray(skyboxVAO);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, Window::cubemapTexture);
-	glDrawArrays(GL_TRIANGLES, 0, 36);
-
-	// unbound skyboxVAO
-	glBindVertexArray(0);
-
-	glDepthMask(GL_TRUE);
 }
 
 void Window::display_callback(GLFWwindow* window)
@@ -375,56 +221,13 @@ void Window::display_callback(GLFWwindow* window)
 	// Clear the color and depth buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
-	// draw skybox first
-	if (!hide_sky_box) {
-		draw_skybox();
-	}
-
 	// Use the shader of programID
-	glUseProgram(Window::shaderProgram);
-
-
-	// draw the actual geometry HERE!!!!!!!!!!
-
+  island->draw(shader);
 
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
 	// Swap buffers
 	glfwSwapBuffers(window);
-
-}
-
-
-unsigned int loadCubemap(vector<std::string> faces)
-{
-	unsigned int textureID;
-	glGenTextures(1, &textureID);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
-
-	int width, height, nrChannels;
-	for (unsigned int i = 0; i < faces.size(); i++)
-	{
-		unsigned char *data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
-		if (data)
-		{
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-				0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
-			);
-			stbi_image_free(data);
-		}
-		else
-		{
-			std::cout << "Cubemap texture failed to load at path: " << faces[i] << std::endl;
-			stbi_image_free(data);
-		}
-	}
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-	return textureID;
 }
 
 void Window::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)

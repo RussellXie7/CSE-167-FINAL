@@ -12,10 +12,6 @@
 #include <GL/glew.h>
 #endif
 #include <GLFW/glfw3.h>
-#include "Curve.h"
-#include "AnchorPoint.h"
-#include "ControlPoint.h"
-
 #include "glm/ext.hpp" 
 
 
@@ -23,15 +19,7 @@ class Window
 {
 
 public:
-	static GLint shaderProgram;
-	static GLint anchorShaderProgram;
-	static GLint controlShaderProgram;
-	static GLint tangentShaderProgram;
-	static GLint selectionShaderProgram;
-	static GLint reflectionShaderProgram;
 	static glm::vec3 cam_pos, cam_look_at, cam_up;
-
-	static unsigned int cubemapTexture;
 
 	static int width;
 	static int height;

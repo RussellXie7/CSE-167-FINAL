@@ -22,7 +22,7 @@ glm::vec3 TerrainGen::getHeight(float x, float z, float radius) {
   }
 
   y += -0.8f * radius * (0.8 - fabs(x) / radius) * (0.8 - fabs(z) / radius);
-  y += 0.2f * radius;
+  y += 0.1f * radius;
 
   // randomly move x, y a little bit
   float dx = dist(genDist);
