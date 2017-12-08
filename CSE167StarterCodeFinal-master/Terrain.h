@@ -27,6 +27,7 @@
 
 /* need Window::V, Window::P */
 #include "Window.h"
+#include "LowPolyPt.h"
 
 struct Terrain {
   std::function<glm::vec3(float, float, float)> upFunc;
@@ -35,6 +36,7 @@ struct Terrain {
 
   int radius;               // squared number of vertex needed
   int inOrOut;              // structure have normal vec point in or out, 1 means out, -1 mean in
+  int priority;
   glm::mat4 toWorld;        // generated vertex should roughly be bounded in box (2 * radius) ^ 3
   GLuint VAO, VBO, EBO;
 
@@ -43,14 +45,15 @@ struct Terrain {
   std::vector<int> startIdx;
   std::vector<int> rowLen;
 
-  Terrain(int, int, std::function<glm::vec3(float, float, float)>, 
-                    std::function<glm::vec3(float, float, float)>, 
-                    std::function<glm::vec3(glm::vec3, float)>); 
+  Terrain(int, int, int, 
+      std::function<glm::vec3(float, float, float)>, 
+      std::function<glm::vec3(float, float, float)>, 
+      std::function<glm::vec3(glm::vec3, float)>); 
 
   void generateTerrainVec();
   void generateFaces();
   void bindVAOVBOEBO();
-  void draw(GLuint);
+  void draw(GLuint, int);
 };
 
 #endif

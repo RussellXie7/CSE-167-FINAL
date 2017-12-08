@@ -34,7 +34,7 @@ struct WaterPt {
   glm::vec2 vertex;
   glm::vec4 neighbors;
   int used;
-}
+};
 
 struct LowPolyWaterPt {
   WaterPt pts[6];
@@ -42,7 +42,7 @@ struct LowPolyWaterPt {
   LowPolyWaterPt(glm::vec2);
   int setNeighbor(glm::vec4);
   glm::vec2 getCoord();
-}
+};
 
 struct LowPolyWater {
   int radius;               // squared number of vertex needed
@@ -54,7 +54,7 @@ struct LowPolyWater {
   CameraTexture refraction;
   CameraTexture reflection;
 
-  std::vector<WaterPt> vertices;
+  std::vector<LowPolyWaterPt> vertices;
   std::vector<int> faces;
 
   LowPolyWater(int, float, int);

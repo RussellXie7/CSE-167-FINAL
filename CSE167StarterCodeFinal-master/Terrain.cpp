@@ -1,12 +1,13 @@
 #include "Terrain.h"
 
-Terrain::Terrain(int radius, int inOrOut, 
+Terrain::Terrain(int radius, int inOrOut, int priority, 
                   std::function<glm::vec3(float, float, float)> upFunc,
                   std::function<glm::vec3(float, float, float)> downFunc,
                   std::function<glm::vec3(glm::vec3, float)> colorFunc) {
   
   this->radius = radius;
   this->inOrOut = inOrOut;
+  this->priority = priority;
   this->upFunc = upFunc;
   this->downFunc = downFunc;
   this->colorFunc = colorFunc;  
@@ -173,7 +174,7 @@ void Terrain::bindVAOVBOEBO() {
   glBindVertexArray(0);
 }
 
-void Terrain::draw(GLuint shader) {
+void Terrain::draw(GLuint shader, int priority) {
   glm::mat4 modelView = Window::V * toWorld;
 
   glUseProgram(shader);
@@ -181,13 +182,20 @@ void Terrain::draw(GLuint shader) {
       1, GL_FALSE, &Window::P[0][0]);
   glUniformMatrix4fv(glGetUniformLocation(shader, "modelview"), 
       1, GL_FALSE, &modelView[0][0]);
+  glUniformMatrix4fv(glGetUniformLocation(shader, "view"), 
+      1, GL_FALSE, &Window::V[0][0]);
   glUniformMatrix4fv(glGetUniformLocation(shader, "model"),
       1, GL_FALSE, &toWorld[0][0]);
   glUniform3f(glGetUniformLocation(shader, "camPos"),
       Window::cam_pos.x, Window::cam_pos.y, Window::cam_pos.z);
 
   glBindVertexArray(VAO);
-  glDrawElements(GL_TRIANGLES, faces.size(), GL_UNSIGNED_INT, 0);
+  if (priority >= this->priority) {
+    glDrawElements(GL_TRIANGLES, faces.size() / 2, GL_UNSIGNED_INT, 0);
+  
+  } else {
+    glDrawElements(GL_TRIANGLES, faces.size(), GL_UNSIGNED_INT, 0);
+  }
   glBindVertexArray(0);
   glUseProgram(0);
 }

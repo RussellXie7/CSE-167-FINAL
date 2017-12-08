@@ -22,5 +22,5 @@ void main() {
   fragColor = color;
 
   gl_Position = projection * modelview * vec4(position, 1.0f);
-  gl_ClipDistance[0] = dot(worldPos, plane);
+  gl_ClipDistance[0] = dot(worldPos, clipPlane);
 }

@@ -18,6 +18,7 @@ int LowPolyWaterPt::setNeighbor(glm::vec4 neighbor) {
     return -1;
 
   pts[i].neighbors = neighbor;
+  pts[i].used = 1;
 
   return i;
 }
@@ -26,39 +27,38 @@ glm::vec2 LowPolyWaterPt::getCoord() {
   return pts[0].vertex;
 }
 
-LowPolyWater::LowPolyWater(int radius, float waterLevel, int priority) {
+LowPolyWater::LowPolyWater(int radius, float waterLevel, int priority)
+    : refraction(priority), reflection(priority) {
+      
   this->radius = radius;
   this->waterLevel = waterLevel;
   this->priority = priority;
   this->toWorld = glm::mat4(1.0f);
-
-  this->refraction = CameraTexture(priority);
-  this->refraction = CameraTexture(priority);
 
   generateWaterVec();
   generateFaces();
   bindVAOVBOEBO();
 }
 
-LowPolyWater::generateWaterVec() {
+void LowPolyWater::generateWaterVec() {
   for(int j = 0; j < 2 * radius; j++) {
     for (int i = 0; i < 2 * radius; i++) {
       float x = float(i - radius + 0.5f);
-      float y = float(i - radius + 0.5f);
+      float y = float(j - radius + 0.5f);
       vertices.push_back(LowPolyWaterPt(glm::vec2(x, y)));
     }
   }
 }
 
-LowPolyWater::generateFaces() {
+void LowPolyWater::generateFaces() {
   for (int j = 0; j < 2 * radius - 1; j++) {
 
     int iter = 0;
     int type = 0;
 
     // iterate thru rowStart to rowEnd
-    int hasNext = 1;
     while (iter < 2 * radius) {
+      int idx0, idx1, idx2;
 
       if (!type) {
         idx0 = iter + 2 * radius * j;
@@ -110,7 +110,7 @@ LowPolyWater::generateFaces() {
 }
 
 void LowPolyWater::bindVAOVBOEBO() {    
-  glGenVertexArray(1, &VAO);
+  glGenVertexArrays(1, &VAO);
   glGenBuffers(1, &VBO);
   glGenBuffers(1, &EBO);
 
@@ -137,43 +137,48 @@ void LowPolyWater::bindVAOVBOEBO() {
 
 void LowPolyWater::prepTexture() {
   // refraction takes photo of things below water level
-  refraction.takeSnapShot(Window::cam_pos, Window::cam_look_at, 
-      Window::cam_up, glm::vec4(0.0f, 1.0f, 0.0f, waterLevel));
 
   // reflection takes photo of things above water level
   glm::vec3 reflectCamPos = Window::cam_pos;
   glm::vec3 reflectCamLookAt = Window::cam_look_at;
 
-  reflectCamPos.y -= 2.0f * (reflectCamPos.y - waterLevel);
-  reflectCamLookAt.y -= 2.0f * (reflectCamLookAt.y - waterLevel);
+  reflectCamPos.y = waterLevel - (reflectCamPos.y - waterLevel);
+  reflectCamLookAt.y = waterLevel - (reflectCamLookAt.y - waterLevel);
 
   reflection.takeSnapShot(reflectCamPos, reflectCamLookAt,
-      -Window::cam_up, glm::vec4(0.0f, -1.0f, 0.0f, waterLevel));
+      Window::cam_up, glm::vec4(0.0f, 1.0f, 0.0f, waterLevel));
+
+  refraction.takeSnapShot(Window::cam_pos, Window::cam_look_at, 
+      Window::cam_up, glm::vec4(0.0f, -1.0f, 0.0f, waterLevel));
 }
 
 void LowPolyWater::draw(GLuint shader, int priority) {
   // only render when priority is lower than my priority
-  if (priority >= this->priority)
-    return;
+  if (priority >= this->priority) return;
 
   glUseProgram(shader);
-
   glUniformMatrix4fv(glGetUniformLocation(shader, "projection"),
-    1, GL_FALSE, &Window::P[0][0]);
+      1, GL_FALSE, &Window::P[0][0]);
   glUniformMatrix4fv(glGetUniformLocation(shader, "view"),
-    1, GL_FALSE, &Window::V[0][0]);
+      1, GL_FALSE, &Window::V[0][0]);
   glUniformMatrix4fv(glGetUniformLocation(shader, "model"),
-    1, GL_FALSE, &toWorld[0][0]);
+      1, GL_FALSE, &toWorld[0][0]);
+  glUniform1f(glGetUniformLocation(shader, "waterLevel"), waterLevel);
+  glUniform1i(glGetUniformLocation(shader, "reflectTex"), 0);
+  glUniform1i(glGetUniformLocation(shader, "refractTex"), 1);
 
   glBindVertexArray(VAO);
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, refraction.texture);
-  glActiveTexture(GL_TEXTURE1);
-  glBindTexture(GL_TEXTURE_2D, reflection.texture);
-  
-  glDrawElements(GL_TRIANGLES, faces.size(), GL_UNSIGNED_INT, 0);
 
+  glActiveTexture(GL_TEXTURE0);
+  glEnable(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, reflection.texture);
+  glEnable(GL_TEXTURE_2D);
+  glActiveTexture(GL_TEXTURE1);
+  glBindTexture(GL_TEXTURE_2D, refraction.texture);
+
+  glDrawElements(GL_TRIANGLES, faces.size(), GL_UNSIGNED_INT, 0);
   glBindVertexArray(0);
+
   glUseProgram(0);
 }
 

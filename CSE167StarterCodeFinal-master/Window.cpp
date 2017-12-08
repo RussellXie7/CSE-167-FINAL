@@ -3,7 +3,7 @@
 #include "stb_image.h"
 #endif
 
-#include "window.h"
+#include "Window.h"
 #include <math.h>
 #include <cstdint>
 #include <algorithm>
@@ -18,9 +18,8 @@
 #include "TerrainGen.h"
 #include "Terrain.h"
 #include "LowPolyOBJ.h"
+#include "LowPolyWater.h"
 
-
-using namespace std;
 
 #pragma region Old Declarations
 
@@ -32,6 +31,7 @@ GLuint * Window::shader;
 int Window::shaderNum = 0;
 
 Terrain * island;
+LowPolyWater * water;
 
 // On some systems you need to change this to the absolute path
 const char * shaderPath[] = {
@@ -42,7 +42,7 @@ const char * shaderPath[] = {
 };
 
 // Default camera parameters
-glm::vec3 Window::cam_pos(0.0f, 0.0f, 150.0f);		// e  | Position of camera
+glm::vec3 Window::cam_pos(0.0f, 60.0f, 60.0f);		// e  | Position of camera
 glm::vec3 Window::cam_look_at(0.0f, 0.0f, 0.0f);	// d  | This is where the camera looks at
 glm::vec3 Window::cam_up(0.0f, 1.0f, 0.0f);			// up | What orientation "up" is
 
@@ -66,8 +66,11 @@ void Window::initialize_objects()
     shader[i] = LoadShaders(shaderPath[2 * i], shaderPath[2 * i + 1]);
   }
 
-  island = new Terrain(20, 1, TerrainGen::getHeight, 
+  island = new Terrain(20, 1, 1, TerrainGen::getHeight, 
       SphereGen::getHeightLower, TerrainColorGen::getColor);
+  water = new LowPolyWater(20, 0.0f, 1); 
+  std::cout << water->faces.size() << "\n";
+  std::cout << "\n";
 }
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
@@ -243,10 +246,8 @@ void Window::display_callback(GLFWwindow* window)
 }
 
 void Window::render(unsigned int priority) {
-  // object using FBO with lower render priority need to be render first;
+  island->draw(shader[0], priority);
   water->draw(shader[1], priority);
-
-  island->draw(shader[0]);
 }
 
 void Window::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)

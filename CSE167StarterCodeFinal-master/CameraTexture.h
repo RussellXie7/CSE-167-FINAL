@@ -32,11 +32,11 @@ struct CameraTexture {
   int priority;
   GLuint FBO;
   GLuint depthBuf;
-  GLuint textureId;
+  GLuint texture;
 
   CameraTexture(int);
 
-  void takeSnapShot(glm::vec3, glm::vec3, glm::vec4);
+  void takeSnapShot(glm::vec3, glm::vec3, glm::vec3, glm::vec4);
 };
 
 #endif
