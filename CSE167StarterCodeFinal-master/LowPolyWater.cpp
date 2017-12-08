@@ -33,7 +33,7 @@ LowPolyWater::LowPolyWater(int radius, float waterLevel, int priority)
   this->radius = radius;
   this->waterLevel = waterLevel;
   this->priority = priority;
-  this->toWorld = glm::mat4(1.0f);
+  this->toWorld = glm::scale(glm::mat4(1.0f), glm::vec3(0.95f, 0.95f, 0.95f));
 
   generateWaterVec();
   generateFaces();
@@ -166,6 +166,8 @@ void LowPolyWater::draw(GLuint shader, int priority) {
   glUniform1f(glGetUniformLocation(shader, "waterLevel"), waterLevel);
   glUniform1i(glGetUniformLocation(shader, "reflectTex"), 0);
   glUniform1i(glGetUniformLocation(shader, "refractTex"), 1);
+  glUniform3f(glGetUniformLocation(shader, "camPos"),
+      Window::cam_pos.x, Window::cam_pos.y, Window::cam_pos.z);
 
   glBindVertexArray(VAO);
 
