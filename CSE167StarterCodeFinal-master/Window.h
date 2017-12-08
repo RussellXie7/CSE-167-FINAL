@@ -28,6 +28,9 @@ public:
 	static double old_xpos;
 	static double old_ypos;
 
+  static GLuint * shader;
+  static int shaderNum;
+
 	static glm::mat4 P; // P for projection
 	static glm::mat4 V; // V for view
 	static void initialize_objects();
@@ -36,6 +39,7 @@ public:
 	static void resize_callback(GLFWwindow* window, int width, int height);
 	static void idle_callback();
 	static void display_callback(GLFWwindow*);
+  static void render(unsigned int);
 	static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 	
 	// Mouse control callbacks

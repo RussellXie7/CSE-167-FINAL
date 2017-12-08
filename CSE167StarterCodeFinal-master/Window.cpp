@@ -28,7 +28,8 @@ const char* window_title = "GLFW Starter Project";
 
 GLint skyboxShaderProgram;
 
-GLuint shader;
+GLuint * Window::shader;
+int Window::shaderNum = 0;
 
 Terrain * island;
 
@@ -36,6 +37,8 @@ Terrain * island;
 const char * shaderPath[] = {
   "./LowPoly.vert",
   "./LowPoly.frag",
+  "./Water.vert",
+  "./Water.frag"
 };
 
 // Default camera parameters
@@ -57,8 +60,14 @@ glm::mat4 Window::V;
 
 void Window::initialize_objects()
 {
-  shader = LoadShaders(shaderPath[0], shaderPath[1]);
-  island = new Terrain(20, 1, TerrainGen::getHeight, SphereGen::getHeightLower, TerrainColorGen::getColor);
+  shaderNum = sizeof(shaderPath) / sizeof(char *) / 2;
+  shader = (GLuint *) malloc(shaderNum * sizeof(GLuint));
+  for (int i = 0; i < shaderNum; i++) {
+    shader[i] = LoadShaders(shaderPath[2 * i], shaderPath[2 * i + 1]);
+  }
+
+  island = new Terrain(20, 1, TerrainGen::getHeight, 
+      SphereGen::getHeightLower, TerrainColorGen::getColor);
 }
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
@@ -220,14 +229,24 @@ void Window::display_callback(GLFWwindow* window)
 {
 	// Clear the color and depth buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
-	// Use the shader of programID
-  island->draw(shader);
+
+  // prepare water FBO
+  water->prepTexture();
+
+	// draw with priority 0
+  render(0);
 
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
 	// Swap buffers
 	glfwSwapBuffers(window);
+}
+
+void Window::render(unsigned int priority) {
+  // object using FBO with lower render priority need to be render first;
+  water->draw(shader[1], priority);
+
+  island->draw(shader[0]);
 }
 
 void Window::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)

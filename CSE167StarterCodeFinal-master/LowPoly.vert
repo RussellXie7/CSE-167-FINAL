@@ -8,15 +8,19 @@ uniform mat4 projection;
 uniform mat4 modelview;
 uniform mat4 model;
 uniform mat4 view;
+uniform vec4 clipPlane;
 
 out vec3 fragPos;
 out vec3 fragNormal;
 out vec3 fragColor;
 
 void main() {
-  gl_Position = projection * modelview * vec4(position, 1.0f);
-  fragPos  = vec3(model * vec4(position, 1.0f));
-  // fragNormal = mat3(transpose(inverse(modelview))) */ normal;
+  vec4 worldPos = model * vec4(position, 1.0f);
+
+  fragPos  = vec3(worldPos);
   fragNormal = normal;
   fragColor = color;
+
+  gl_Position = projection * modelview * vec4(position, 1.0f);
+  gl_ClipDistance[0] = dot(worldPos, plane);
 }

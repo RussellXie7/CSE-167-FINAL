@@ -26,7 +26,6 @@
 #include <iostream>
 
 /* need Window::V, Window::P */
-#include "LowPolyPt.h"
 #include "Window.h"
 
 struct Terrain {
