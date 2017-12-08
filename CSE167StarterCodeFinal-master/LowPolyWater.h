@@ -47,6 +47,7 @@ struct LowPolyWaterPt {
 struct LowPolyWater {
   int radius;               // squared number of vertex needed
   float waterLevel;           // water level
+  float waveTime;
   int priority;
   glm::mat4 toWorld;        // vertex should roughly bounded in box (2 * radius) ^ 3
   GLuint VAO, VBO, EBO;
