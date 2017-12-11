@@ -37,6 +37,7 @@ struct CameraTexture {
   CameraTexture(int);
 
   void takeSnapShot(glm::vec3, glm::vec3, glm::vec3, glm::vec4);
+  void resize();
 };
 
 #endif

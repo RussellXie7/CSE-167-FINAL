@@ -11,6 +11,7 @@
 #else
 #include <GL/glew.h>
 #endif
+
 #include <GLFW/glfw3.h>
 #include "glm/ext.hpp" 
 
@@ -51,6 +52,7 @@ public:
 	static void CameraOrbit(float, float);
 	static void CameraTranslate(glm::vec3);
 
-};
+	static glm::vec3 trackBallMapping(double x, double y);
 
+};
 #endif

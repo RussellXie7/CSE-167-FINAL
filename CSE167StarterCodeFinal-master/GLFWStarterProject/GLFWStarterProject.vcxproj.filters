@@ -21,34 +21,37 @@
     <ClInclude Include="..\Window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\shader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Light.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Material.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\stb_image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Group.h">
+    <ClInclude Include="..\LowPolyOBJ.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Node.h">
+    <ClInclude Include="..\LowPolyPt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Transform.h">
+    <ClInclude Include="..\LowPolyWater.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Curve.h">
+    <ClInclude Include="..\shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Cube.h">
+    <ClInclude Include="..\SkyboxColorGen.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\OBJObject.h">
+    <ClInclude Include="..\SphereGen.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TerrainColorGen.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TerrainGen.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CameraTexture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DofEffect.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -62,70 +65,49 @@
     <ClCompile Include="..\Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Light.cpp">
+    <ClCompile Include="..\CameraTexture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Material.cpp">
+    <ClCompile Include="..\LowPolyOBJ.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Transform.cpp">
+    <ClCompile Include="..\LowPolyPt.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Group.cpp">
+    <ClCompile Include="..\LowPolyWater.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Curve.cpp">
+    <ClCompile Include="..\SkyboxColorGen.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Cube.cpp">
+    <ClCompile Include="..\SphereGen.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\OBJObject.cpp">
+    <ClCompile Include="..\Terrain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TerrainColorGen.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TerrainGen.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DofEffect.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="..\Shaders\anchorShader.frag">
+    <None Include="..\LowPoly.frag">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="..\Shaders\anchorShader.vert">
+    <None Include="..\LowPoly.vert">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="..\Shaders\controlShader.frag">
+    <None Include="..\Water.frag">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="..\Shaders\controlShader.vert">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="..\Shaders\curveShader.frag">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="..\Shaders\curveShader.vert">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="..\Shaders\reflectionShader.frag">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="..\Shaders\reflectionShader.vert">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="..\Shaders\selectionShader.frag">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="..\Shaders\selectionShader.vert">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="..\Shaders\skyboxShader.frag">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="..\Shaders\skyboxShader.vert">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="..\Shaders\tangentShader.frag">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="..\Shaders\tangentShader.vert">
+    <None Include="..\Water.vert">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>

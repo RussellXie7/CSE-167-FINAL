@@ -27,8 +27,14 @@ CameraTexture::CameraTexture(int priority) {
       GL_TEXTURE_2D, depthBuf);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
       GL_TEXTURE_2D, texture, 0);
-
+  
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+
+void CameraTexture::resize() {
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Window::width, Window::height, 0,
+		GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 }
 
 void CameraTexture::takeSnapShot(glm::vec3 camPos, glm::vec3 camLookAt, 
