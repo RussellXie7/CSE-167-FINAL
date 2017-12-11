@@ -8,7 +8,7 @@
 CC=g++
 LDLIBS=-lglfw -lglew -framework OpenGL
 
-OBJS=shader.o LowPolyPt.o SkyboxColorGen.o SphereGen.o TerrainColorGen.o TerrainGen.o Terrain.o LowPolyOBJ.o CameraTexture.o LowPolyWater.o Skybox.o
+OBJS=shader.o LowPolyPt.o SkyboxColorGen.o SphereGen.o TerrainColorGen.o TerrainGen.o Terrain.o LowPolyOBJ.o CameraTexture.o LowPolyWater.o Skybox.o DofEffect.o
 MAIN_OBJS=Window.o main.o 
 CC=g++
 

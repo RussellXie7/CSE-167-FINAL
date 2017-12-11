@@ -11,7 +11,11 @@ glm::vec3 TerrainGen::getHeight(float x, float z, float radius) {
 
   float y = 0.0f;
   float d = float(pow(2, OCTAVES - 1));
+#ifdef __APPLE__
   float amplitude = radius;
+#else
+  float amplitude = radius / 3.0f;
+#endif
 
   // mix wave of decreasing amplitude and increase frequency
   for (int i = 0; i < 5; i++) {
@@ -22,7 +26,11 @@ glm::vec3 TerrainGen::getHeight(float x, float z, float radius) {
   }
 
   y += -0.8f * radius * (0.8 - fabs(x) / radius) * (0.8 - fabs(z) / radius);
+#ifdef __APPLE__
   y += 0.12f * radius;
+#else
+  y += 0.15f * radius;
+#endif
 
   // randomly move x, y a little bit
   float dx = dist(genDist);

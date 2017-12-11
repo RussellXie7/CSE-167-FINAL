@@ -19,46 +19,40 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Cube.h" />
-    <ClInclude Include="..\Curve.h" />
-    <ClInclude Include="..\Group.h" />
-    <ClInclude Include="..\Light.h" />
+    <ClInclude Include="..\CameraTexture.h" />
+    <ClInclude Include="..\DofEffect.h" />
+    <ClInclude Include="..\LowPolyOBJ.h" />
+    <ClInclude Include="..\LowPolyPt.h" />
+    <ClInclude Include="..\LowPolyWater.h" />
     <ClInclude Include="..\main.h" />
-    <ClInclude Include="..\Material.h" />
-    <ClInclude Include="..\Node.h" />
-    <ClInclude Include="..\OBJObject.h" />
     <ClInclude Include="..\shader.h" />
+    <ClInclude Include="..\SkyboxColorGen.h" />
+    <ClInclude Include="..\SphereGen.h" />
     <ClInclude Include="..\stb_image.h" />
-    <ClInclude Include="..\Transform.h" />
+    <ClInclude Include="..\TerrainColorGen.h" />
+    <ClInclude Include="..\TerrainGen.h" />
     <ClInclude Include="..\Window.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Cube.cpp" />
-    <ClCompile Include="..\Curve.cpp" />
-    <ClCompile Include="..\Group.cpp" />
-    <ClCompile Include="..\Light.cpp" />
+    <ClCompile Include="..\CameraTexture.cpp" />
+    <ClCompile Include="..\DofEffect.cpp" />
+    <ClCompile Include="..\LowPolyOBJ.cpp" />
+    <ClCompile Include="..\LowPolyPt.cpp" />
+    <ClCompile Include="..\LowPolyWater.cpp" />
     <ClCompile Include="..\main.cpp" />
-    <ClCompile Include="..\Material.cpp" />
-    <ClCompile Include="..\OBJObject.cpp" />
     <ClCompile Include="..\shader.cpp" />
-    <ClCompile Include="..\Transform.cpp" />
+    <ClCompile Include="..\SkyboxColorGen.cpp" />
+    <ClCompile Include="..\SphereGen.cpp" />
+    <ClCompile Include="..\Terrain.cpp" />
+    <ClCompile Include="..\TerrainColorGen.cpp" />
+    <ClCompile Include="..\TerrainGen.cpp" />
     <ClCompile Include="..\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Shaders\anchorShader.frag" />
-    <None Include="..\Shaders\anchorShader.vert" />
-    <None Include="..\Shaders\controlShader.frag" />
-    <None Include="..\Shaders\controlShader.vert" />
-    <None Include="..\Shaders\curveShader.frag" />
-    <None Include="..\Shaders\curveShader.vert" />
-    <None Include="..\Shaders\reflectionShader.frag" />
-    <None Include="..\Shaders\reflectionShader.vert" />
-    <None Include="..\Shaders\selectionShader.frag" />
-    <None Include="..\Shaders\selectionShader.vert" />
-    <None Include="..\Shaders\skyboxShader.frag" />
-    <None Include="..\Shaders\skyboxShader.vert" />
-    <None Include="..\Shaders\tangentShader.frag" />
-    <None Include="..\Shaders\tangentShader.vert" />
+    <None Include="..\LowPoly.frag" />
+    <None Include="..\LowPoly.vert" />
+    <None Include="..\Water.frag" />
+    <None Include="..\Water.vert" />
     <None Include="packages.config" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

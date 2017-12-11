@@ -15,7 +15,9 @@
 #include "LowPolyOBJ.h"
 #include "LowPolyWater.h"
 #include "Skybox.h"
+#include "DofEffect.h"
 
+using namespace std;
 
 #pragma region Old Declarations
 
@@ -32,12 +34,21 @@ Skybox * skybox;
 
 // On some systems you need to change this to the absolute path
 const char * shaderPath[] = {
+#ifdef __APPLE__ // Because Apple hates comforming to standards
   "./LowPoly.vert",
   "./LowPoly.frag",
   "./Water.vert",
   "./Water.frag",
   "./skybox.vert",
   "./skybox.frag"
+#else
+  "../LowPoly.vert",
+  "../LowPoly.frag",
+  "../Water.vert",
+  "../Water.frag",
+  "../skybox.vert",
+  "../skybox.frag"
+#endif
 };
 
 // Default camera parameters
@@ -57,6 +68,17 @@ glm::mat4 Window::V;
 
 #pragma endregion
 
+#ifdef __APPLE__ // Because Apple hates comforming to standards
+#define SCENE_VERTEX_SHADER_PATH "./Shaders/bokeh.vert"
+#define SCENE_FRAGMENT_SHADER_PATH "./Shaders/bokeh.frag"
+#else
+#define SCENE_VERTEX_SHADER_PATH "../Shaders/bokeh.vert"
+#define SCENE_FRAGMENT_SHADER_PATH "../Shaders/bokeh.frag"
+#endif
+GLint screenShaderProgram;
+bool isDof = true;
+DofEffect* dof_effect;
+
 void Window::initialize_objects()
 {
   shaderNum = sizeof(shaderPath) / sizeof(char *) / 2;
@@ -65,14 +87,24 @@ void Window::initialize_objects()
     shader[i] = LoadShaders(shaderPath[2 * i], shaderPath[2 * i + 1]);
   }
 
-  island = new Terrain(20, 1, 1, TerrainGen::getHeight, 
+  island = new Terrain(30, 1, 1, TerrainGen::getHeight, 
       SphereGen::getHeightLower, TerrainColorGen::getColor);
-  water = new LowPolyWater(20, 0.0f, 1); 
+
+#ifdef __APPLE__ // Because Apple hates comforming to standards
   char* faces[] = {"../skybox/left.jpg", "../skybox/right.jpg", "../skybox/up.jpg", "../skybox/down.jpg", 
     "../skybox/front.jpg", "../skybox/back.jpg"};
+#else
+  char* faces[] = {"../../skybox/left.jpg", "../../skybox/right.jpg", "../../skybox/up.jpg", "../../skybox/down.jpg", 
+    "../../skybox/front.jpg", "../../skybox/back.jpg"};
+#endif
+
   std::vector<std::string> fs(faces, faces + 6);
   skybox = new Skybox(fs);
   skybox->toWorld = glm::scale(glm::mat4(1.0f), glm::vec3(250.0f, 250.0f, 250.0f));
+  water = new LowPolyWater(30, 0.0f, 1); 
+
+  screenShaderProgram = LoadShaders(SCENE_VERTEX_SHADER_PATH, SCENE_FRAGMENT_SHADER_PATH);
+  dof_effect = new DofEffect(screenShaderProgram);
 }
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
@@ -156,14 +188,59 @@ void Window::CameraOrbit(float x_diff, float y_diff) {
 	V = glm::lookAt(cam_pos, cam_look_at, cam_up);
 }
 
+glm::vec3 Window::trackBallMapping(double x, double y)
+{
+	glm::vec3 v;    // Vector v is the synthesized 3D position of the mouse location on the trackball
+	float d;     // this is the depth of the mouse location: the delta between the plane through the center of the trackball and the z position of the mouse
+	v.x = (float)(2.0 * x - width) / width;   // this calculates the mouse X position in trackball coordinates, which range from -1 to +1
+	v.y = (float)(height - 2.0 * y) / height;   // this does the equivalent to the above for the mouse Y position
+	v.z = 0.0;   // initially the mouse z position is set to zero, but this will change below
+	d = glm::length(v);    // this is the distance from the trackball's origin to the mouse location, without considering depth (=in the plane of the trackball's origin)
+	d = (d < 1.0f) ? d : 1.0f;   // this limits d to values of 1.0 or less to avoid square roots of negative values in the following line
+	v.z = sqrtf(1.001f - d * d);  // this calculates the Z coordinate of the mouse position on the trackball, based on Pythagoras: v.z*v.z + d*d = 1*1
+	v = normalize(v); // Still need to normalize, since we only capped d, not v.
+	return v;  // return the mouse location on the surface of the trackball
+}
+
 void Window::cursor_pos_callback(GLFWwindow* window, double xpos, double ypos) {
 	
 	if (old_xpos == -99999) old_xpos = xpos;
 	if (old_ypos == -99999) old_ypos = ypos;
 	
+	glm::vec3 prev_pos = trackBallMapping(old_xpos,old_ypos);
+	glfwGetCursorPos(window, &xpos, &ypos);
+	glm::vec3 curr_pos = trackBallMapping(xpos, ypos);
+
 	if (left_mouse_on) {
 		// do selectionbuffer
-		CameraOrbit(float(xpos - old_xpos), float(ypos - old_ypos));
+		// CameraOrbit(float(xpos - old_xpos), float(ypos - old_ypos));
+		float rotation_angle;
+		// dot product and then divide by the mutiple of them to get the ratation angle
+		rotation_angle = glm::acos((glm::dot(prev_pos, curr_pos) / (glm::length(prev_pos) * glm::length(curr_pos))));
+		float cos = glm::dot(prev_pos, curr_pos) / (glm::length(prev_pos) * glm::length(curr_pos));
+		if (cos > 1)
+		{
+			cos = 1;
+			rotation_angle = acos(cos);
+		}
+		glm::vec3 rotation_axis;
+		// cross product to get the rotation axis
+		rotation_axis = glm::cross(prev_pos, curr_pos);
+		// if too less time, do not do anything
+		if ((glm::length(curr_pos - prev_pos) > 0.001)) {
+			float x_diff = xpos - old_xpos;
+			float y_diff = ypos - old_ypos;
+
+			if (cam_pos.z < 0) y_diff = -y_diff;
+
+			float off = 0.3f;
+			cam_pos = glm::rotate(glm::mat4(), (float)(off * -(x_diff) / 180.0f) * glm::pi<float>(), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(cam_pos, 1.0f);
+			cam_pos = glm::rotate(glm::mat4(), (float)(off * -(y_diff) / 180.0f) * glm::pi<float>(), glm::vec3(1.0f, 0.0f, 0.0f)) * glm::vec4(cam_pos, 1.0f);
+			cam_up = glm::rotate(glm::mat4(), (float)(off * (x_diff) / 180.0f) * glm::pi<float>(), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(cam_up, 1.0f);
+			cam_look_at = glm::normalize(glm::vec3(0.0f, 0.0f, 0.0f) - cam_pos);
+			P = glm::perspective(45.0f, (float)width / (float)height, 0.1f, 10000.0f);
+			V = glm::lookAt(cam_pos, cam_look_at, cam_up);
+		}
 	}
 
 	if (right_mouse_on) {
@@ -215,6 +292,7 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 #endif
 	Window::width = width;
 	Window::height = height;
+
 	// Set the viewport size. This is the only matrix that OpenGL maintains for us in modern OpenGL!
 	glViewport(0, 0, width, height);
 
@@ -223,6 +301,10 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 		P = glm::perspective(45.0f, (float)width / (float)height, 0.1f, 10000.0f);
 		V = glm::lookAt(cam_pos, cam_look_at, cam_up);
 	}
+
+	water->reflection.resize();
+	water->refraction.resize();
+
 }
 
 void Window::idle_callback()
@@ -232,14 +314,26 @@ void Window::idle_callback()
 
 void Window::display_callback(GLFWwindow* window)
 {
+
 	// Clear the color and depth buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  // prepare water FBO
-  water->prepTexture();
+	// prepare water FBO
+	water->prepTexture();
+	
+	if (isDof) {
+		dof_effect->bindFrameBuffer();
+		// Clear the color and depth buffers
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
 
 	// draw with priority 0
-  render(0);
+	render(0);
+
+	// func(bokeh_shader, aperture, focus, maxBlur)
+	if (isDof) {
+		dof_effect->dof_post_processing(screenShaderProgram);
+	}
 
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
@@ -264,7 +358,18 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 			// Close the window. This causes the program to also terminate.
 			glfwSetWindowShouldClose(window, GL_TRUE);
 		}
+		
+	if (key == GLFW_KEY_P) {
+	isDof = !isDof;
+	}
 
+	if (key == GLFW_KEY_U) {
+	dof_effect->increase_focus();
+	}
+
+	if (key == GLFW_KEY_I) {
+	dof_effect->decrease_focus();
+	}
 	}
 
 	// when that key is released

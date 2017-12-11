@@ -6,7 +6,7 @@
  */
 #ifndef LOWPOLYOBJ_H
 #define LOWPOLYOBJ_H
-
+#define _CRT_SECURE_NO_WARNINGS
 #ifdef __APPLE__
 #include <OpenGL/gl3.h>
 #include <OpenGL/glext.h>
