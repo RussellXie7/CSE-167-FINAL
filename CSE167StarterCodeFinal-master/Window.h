@@ -1,4 +1,4 @@
-
+#pragma comment(lib, "irrKlang.lib")
 
 #ifndef _WINDOW_H_
 #define _WINDOW_H_
@@ -14,7 +14,9 @@
 
 #include <GLFW/glfw3.h>
 #include "glm/ext.hpp" 
-
+#include <stdlib.h>
+#include "./GLFWStarterProject/include/irrKlang.h"
+#include <string>
 
 class Window
 {

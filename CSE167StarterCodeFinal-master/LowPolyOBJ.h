@@ -29,6 +29,7 @@
 /* need Window::V, Window::P */
 #include "LowPolyPt.h"
 #include "Window.h"
+#include "boundingBox.h"
 
 struct LowPolyOBJ {
   std::function<glm::vec3(glm::vec3, float)> colorFunc;
@@ -39,14 +40,21 @@ struct LowPolyOBJ {
 
   std::vector<vertNormColorPair> vertices;
   std::vector<int> faces;
+  boundingBox* box;
+  int check = 0;
+  glm::vec3 center;
 
   LowPolyOBJ(int, char *, std::function<glm::vec3(glm::vec3, float)>); 
 
   void parse(char *);
   void bindVAOVBOEBO();
   void draw(GLuint);
+  void translate(float locX, float locY, float locZ);
+  void orbitY(int counter);
+  void drawTree(GLuint);
+  void scale(float size);
+  void orbittranslate(float locX, float locY, float locZ, float ang);
 };
-
 #endif
 
 
