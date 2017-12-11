@@ -188,7 +188,8 @@ void Terrain::draw(GLuint shader, int priority) {
       1, GL_FALSE, &toWorld[0][0]);
   glUniform3f(glGetUniformLocation(shader, "camPos"),
       Window::cam_pos.x, Window::cam_pos.y, Window::cam_pos.z);
-
+  glUniform1i(glGetUniformLocation(shader, "toon"),
+	  0);
   glBindVertexArray(VAO);
   if (priority >= this->priority) {
     glDrawElements(GL_TRIANGLES, faces.size() / 2, GL_UNSIGNED_INT, 0);

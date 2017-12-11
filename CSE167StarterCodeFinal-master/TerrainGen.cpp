@@ -8,7 +8,6 @@ std::normal_distribution<float> TerrainGen::dist(0.0f, 0.5f);
  * public function, to generate height
  */
 glm::vec3 TerrainGen::getHeight(float x, float z, float radius) {
-
   float y = 0.0f;
   float d = float(pow(2, OCTAVES - 1));
 #ifdef __APPLE__
@@ -39,7 +38,7 @@ glm::vec3 TerrainGen::getHeight(float x, float z, float radius) {
   dz = fabs(dx) > 0.5f? 0.0f: dz; 
 
   if (fabs(x - radius) < 0.5f || fabs(x + radius) < 0.5f || fabs(z - radius) < 0.5f || fabs(z + radius) < 0.5f)
-    return glm::vec3(x + dx, dx * dz / 2.0f, z + dz);
+	  return glm::vec3(x + dx, dx * dz / 2.0f, z + dz);
   else
     return glm::vec3(x + dx, y, z + dz);
 }

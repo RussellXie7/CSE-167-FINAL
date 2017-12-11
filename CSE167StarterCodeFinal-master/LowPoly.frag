@@ -6,7 +6,7 @@ in vec3 fragColor;
 
 in vec3 lightDir0;
 in vec3 lightDir1;
-
+uniform int toon;
 out vec4 color;
 
 void main() {
@@ -21,42 +21,41 @@ void main() {
 
   // calc directional
   result += fragColor * 0.7f;
-  result += fragColor * max(dot(norm, -lightDir0), 0.0f) * 0.01f;
-  result += fragColor * max(dot(norm, -lightDir1), 0.0f) * 0.01f; 
+  vec3 diff1 = fragColor * max(abs(dot(norm, -lightDir0)), 0.0f) * 0.01f;
+  //result += fragColor * max(abs(dot(norm, -lightDir0)), 0.0f) * 0.01f;
+  result += diff1;
 
-
- // // toon shading
-	//float toon_shade_effect = 1.0;
-	//float cosine = max(dot(norm, normalize(lightDir0)), 0.0);
-
-	//if(cosine > 0.98)	toon_shade_effect = 1.0;
-	//else if(cosine > 0.95)	toon_shade_effect = 0.9;
-	//else if(cosine > 0.5)	toon_shade_effect = 0.7;
-	//else if(cosine > 0.05)	toon_shade_effect = 0.35;
-	//else	toon_shade_effect = 1.0;
-
-	//float toon_shade_effect2 = 1.0;
-	//float cosine2 = max(dot(norm, normalize(lightDir1)), 0.0);
-
-	//if(cosine2 > 0.98)	toon_shade_effect2 = 1.0;
-	//else if(cosine2 > 0.95)	toon_shade_effect2 = 0.9;
-	//else if(cosine2 > 0.5)	toon_shade_effect2 = 0.7;
-	//else if(cosine2 > 0.05)	toon_shade_effect2 = 0.35;
-	//else	toon_shade_effect2 = 1.0;
-
-	//result = (toon_shade_effect + toon_shade_effect2) * result;
- // // end of toon shading
-
+  vec3 diff2 = fragColor * max(abs(dot(norm, -lightDir1)), 0.0f) * 0.01f; 
+  result += diff2;
   color = vec4(result * 0.8f, 1.0f);
-
 //  // Toon shading
-//	vec3 viewPos = vec3(0.0f,1.0f,1.0f);
-//	float edge = dot(normalize(viewPos - fragPos), fragNormal);
-//	edge = max(0, -edge);
-
-//	if (edge < 0.0001)
-//	{
-//		color = 0.0 * color;
-//	}
+if(toon == 1) {
+	vec3 viewPos = vec3(0.0f,1.0f,1.0f);
+	float intensity;
+	intensity = dot(normalize(viewPos - fragPos),normalize(fragNormal));
+	float toon_shade = 1.0f;
+	if (intensity > 0.85)
+		color = vec4(color.x,0.5 * color.y,0.5 * color.z,1.0);
+	else if (intensity > 0.45)
+		color = vec4(0.6 * color.x,0.3 * color.y,0.3* color.z,1.0);
+	else if (intensity > 0.25)
+		color = vec4(0.4* color.x,0.2* color.y,0.2* color.z,1.0);
+	else
+		color = vec4(0.2* color.x,0.1* color.y,0.1* color.z,1.0);
+}
+if(toon == 2) {
+	vec3 viewPos = vec3(0.0f,1.0f,1.0f);
+	float intensity;
+	intensity = dot(normalize(viewPos - fragPos),normalize(fragNormal));
+	float toon_shade = 1.0f;
+	if (intensity > 0.85)
+		color = vec4(0.9 * color.x, 0.8 * color.y,0.5 * color.z,1.0);
+	else if (intensity > 0.45)
+		color = vec4(0.65 * color.x,0.55 * color.y,0.3* color.z,1.0);
+	else if (intensity > 0.25)
+		color = vec4(0.45* color.x,0.35* color.y,0.2* color.z,1.0);
+	else
+		color = vec4(0.25* color.x,0.2* color.y,0.1* color.z,1.0);
+}
 //// end of toon shading
 }

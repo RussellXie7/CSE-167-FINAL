@@ -170,7 +170,8 @@ void LowPolyWater::draw(GLuint shader, int priority) {
   glUniform3f(glGetUniformLocation(shader, "camPos"),
       Window::cam_pos.x, Window::cam_pos.y, Window::cam_pos.z);
   glUniform1f(glGetUniformLocation(shader, "waveTime"), waveTime += 0.006f);
-
+  glUniform1i(glGetUniformLocation(shader, "toon"),
+	  0);
   glBindVertexArray(VAO);
 
   glActiveTexture(GL_TEXTURE0);

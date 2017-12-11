@@ -7,7 +7,11 @@ LowPolyOBJ::LowPolyOBJ(int inOrOut,
   this->inOrOut = inOrOut;
   this->colorFunc = colorFunc;  
   this->toWorld = glm::mat4(1.0f);
-
+  float width = 0.708623f;
+  float height = 0.499956f;
+  float depth = 2.0f;
+  center = glm::vec3(0.0f, 0.0f, 0.0f);
+  box = new boundingBox(center, width, height, depth);
   parse(filename);
   bindVAOVBOEBO();
 }
@@ -20,7 +24,7 @@ void LowPolyOBJ::parse(char * filename) {
   float x,y,z;      		// point coordinate
   float r,g,b;      		// point color
   float x_min, x_max, y_min, y_max, z_min, z_max;
-
+  int o, p, j;
   // try open file
   std::ifstream infile(filename);
 
@@ -40,8 +44,8 @@ void LowPolyOBJ::parse(char * filename) {
 
     if (buf[0] == 'f') {
       GLuint n1, n2, n3, v1, v2, v3;
-      int match = sscanf(buf, "f %d//%d %d//%d %d//%d\n", 
-          &v1, &n1, &v2, &n2, &v3, &n3);
+      int match = sscanf(buf, "f %d/%d/%d %d/%d/%d %d/%d/%d\n", 
+          &v1, &o, &n1, &v2, &p, &n2, &v3, &j, &n3);
       
       if (match == 0) {
 				std::cerr << buf << std::endl;
@@ -99,6 +103,10 @@ void LowPolyOBJ::parse(char * filename) {
 	float scaleZ = 2.0 / (z_max - z_min);
 	float scale = fminf(fminf(scaleX, scaleY), scaleZ);	
 
+	//std::cout << (x_max - x_min) * scale << std::endl;
+	//std::cout << (y_max - y_min) * scale << std::endl;
+	//std::cout << (z_max - z_min) * scale << std::endl;
+	//std::cout << "-------" << std::endl;
   firstPoint = true;
   LowPolyPt::setColorInterpolateFunc(colorFunc);
 	for (unsigned int i = 0; i < vertices.size(); ++i) {
@@ -185,6 +193,8 @@ void LowPolyOBJ::draw(GLuint shader) {
       1, GL_FALSE, &toWorld[0][0]);
   glUniform3f(glGetUniformLocation(shader, "camPos"),
       Window::cam_pos.x, Window::cam_pos.y, Window::cam_pos.z);
+  glUniform1i(glGetUniformLocation(shader, "toon"),
+	  1);
 
   glBindVertexArray(VAO);
   glDrawElements(GL_TRIANGLES, faces.size(), GL_UNSIGNED_INT, 0);
@@ -192,3 +202,93 @@ void LowPolyOBJ::draw(GLuint shader) {
   glUseProgram(0);
 }
 
+void LowPolyOBJ::drawTree(GLuint shader) {
+	glm::mat4 modelView = Window::V * toWorld;
+
+	glUseProgram(shader);
+	glUniformMatrix4fv(glGetUniformLocation(shader, "projection"),
+		1, GL_FALSE, &Window::P[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(shader, "modelview"),
+		1, GL_FALSE, &modelView[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(shader, "model"),
+		1, GL_FALSE, &toWorld[0][0]);
+	glUniform3f(glGetUniformLocation(shader, "camPos"),
+		Window::cam_pos.x, Window::cam_pos.y, Window::cam_pos.z);
+	glUniform1i(glGetUniformLocation(shader, "toon"),
+		2);
+
+	glBindVertexArray(VAO);
+	glDrawElements(GL_TRIANGLES, faces.size(), GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+	glUseProgram(0);
+}
+
+void LowPolyOBJ::orbitY(int counter)
+{
+	float ang = 1.0f;
+	if (counter == 0) 
+	{
+		glm::mat4 rot = glm::rotate(glm::mat4(1.0f), -ang / 180.0f * glm::pi<float>(), glm::vec3(0.0f, 0.0f, 1.0f));
+		this->toWorld = rot * this->toWorld;
+		return;
+	}
+	counter = counter % 4;
+	if (counter == 0) 
+	{
+		glm::mat4 rotInv = glm::rotate(glm::mat4(1.0f), -ang / 180.0f * glm::pi<float>(), glm::vec3(0.0f, 0.0f, 1.0f));
+		glm::mat4 rot = glm::rotate(glm::mat4(1.0f), ang / 180.0f * glm::pi<float>(), glm::vec3(0.0f, 0.0f, 1.0f));
+		//glm::mat4 rot = glm::rotate(glm::mat4(1.0f), -ang / 180.0f * glm::pi<float>(), glm::vec3(0.0f, 1.0f, 0.0f));
+		rotInv = glm::inverse(rotInv);
+		this->toWorld = rotInv * this->toWorld;
+		this->toWorld = rot * this->toWorld;
+	}
+	else 
+	{
+		glm::mat4 rotInv = glm::rotate(glm::mat4(1.0f), ang / 180.0f * glm::pi<float>(), glm::vec3(0.0f, 0.0f, 1.0f));
+		glm::mat4 rot = glm::rotate(glm::mat4(1.0f), -ang / 180.0f * glm::pi<float>(), glm::vec3(0.0f, 0.0f, 1.0f));
+		//glm::mat4 rot = glm::rotate(glm::mat4(1.0f), -ang / 180.0f * glm::pi<float>(), glm::vec3(0.0f, 1.0f, 0.0f));
+		rotInv = glm::inverse(rotInv);
+		this->toWorld = rotInv * this->toWorld;
+		this->toWorld = rot * this->toWorld; 
+	}
+}
+
+void LowPolyOBJ::scale(float size)
+{
+	glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(size, size, size));
+	this->toWorld = scale * this->toWorld;
+}
+
+void LowPolyOBJ::translate(float locX, float locY, float locZ)
+{
+	glm::mat4 trans = glm::translate(glm::mat4(1.0f), glm::vec3(locX, locY, locZ));
+	this->toWorld = trans * this->toWorld;
+	this->center = this->toWorld * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	box->setCenter(center);
+}
+
+void LowPolyOBJ::orbittranslate(float locX, float locY, float locZ, float ang)
+{
+	//auto translateMat = glm::vec3(toWorld[3][0], toWorld[3][1], toWorld[3][2]);
+	//glm::mat4 translate = glm::translate(glm::mat4(1.0f), translateMat);
+	glm::mat4 trans = glm::translate(glm::mat4(1.0f), glm::vec3(locX, locY, locZ));
+	//translate = trans * translate;
+	//glm::mat4 orbit =
+	//	glm::rotate(glm::mat4(1.0f), ang / 180.0f * glm::pi<float>(), glm::vec3(0.0f, 1.0f, 0.0f));
+	//this->toWorld = translate * orbit;
+	//this->toWorld = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, toWorld[3][1], 0.0f));
+	//this->toWorld = glm::rotate(glm::mat4(1.0f), ang / 180.0f * glm::pi<float>(), glm::vec3(0.0f, 1.0f, 0.0f)) * this->toWorld;
+	//glm::mat4 inverseTrans = glm::inverse(translate);
+	this->center = trans * this->toWorld * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	box->setCenter(center);
+	if ((check == 1) && (box->detectCollisionHeight() == 1)) 
+	{
+		trans = glm::mat4();
+	}
+	this->toWorld = trans * this->toWorld;
+	//this->toWorld = glm::rotate(glm::mat4(1.0f), ang / 180.0f * glm::pi<float>(), glm::vec3(0.0f, 1.0f, 0.0f)) * this->toWorld;
+	/**this->toWorld = translate * this->toWorld;
+	translate = glm::translate(glm::mat4(), glm::vec3(locX, locY, locZ));
+	this->toWorld = translate * this->toWorld;
+	*/
+}

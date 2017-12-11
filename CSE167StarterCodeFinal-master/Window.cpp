@@ -31,6 +31,7 @@ int Window::shaderNum = 0;
 Terrain * island;
 LowPolyWater * water;
 Skybox * skybox;
+int counter = 0;
 
 // On some systems you need to change this to the absolute path
 const char * shaderPath[] = {
@@ -78,9 +79,61 @@ glm::mat4 Window::V;
 GLint screenShaderProgram;
 bool isDof = true;
 DofEffect* dof_effect;
+LowPolyOBJ* boat;
+LowPolyOBJ* tree;
 
+#ifndef __APPLE__
+irrklang::ISoundEngine *SoundEngine;
+#endif
 void Window::initialize_objects()
 {
+	auto func1 = [](glm::vec3 vex, float rad) { 
+		
+		if (vex.y < 2.2f) 
+		{
+			return glm::vec3(0.87f, 0.86f, 0.89f);
+		} 
+		else 
+		{
+			return glm::vec3(0.988f, 0.29f, 0.10f);
+		}
+	};
+	boat = new LowPolyOBJ(1,
+#ifdef __APPLE__
+		"./obj/boat.obj",
+#else
+		"../obj/boat.obj",
+#endif
+		func1);
+	boat->check = 1;
+	auto func2 = [](glm::vec3 vex, float rad) {
+		if (vex.y < 1.0f)
+		{
+			return glm::vec3(0.988f, 0.29f, 0.10f);
+		}
+		else
+		{
+			return glm::vec3(243.0f / 255.0f, 188.0f / 255.0f, 46.0f / 255.0f);
+		}
+	};
+	tree = new LowPolyOBJ(1,
+#ifdef __APPLE__
+		"./obj/tree.obj",
+#else
+    "../obj/tree.obj",
+#endif
+		func2);
+	tree->check = 0;
+	tree->scale(8.0f);
+	tree->translate(12.0f, 0.5f, 1.0f);
+	boat->translate(0.0f, -1.75f, 0.0f);
+#ifndef __APPLE__
+  SoundEngine = irrklang::createIrrKlangDevice();
+  if (!SoundEngine)
+  {
+	cout << "Error in loading the sound engine" << endl;
+  }
+#endif
   shaderNum = sizeof(shaderPath) / sizeof(char *) / 2;
   shader = (GLuint *) malloc(shaderNum * sizeof(GLuint));
   for (int i = 0; i < shaderNum; i++) {
@@ -105,6 +158,9 @@ void Window::initialize_objects()
 
   screenShaderProgram = LoadShaders(SCENE_VERTEX_SHADER_PATH, SCENE_FRAGMENT_SHADER_PATH);
   dof_effect = new DofEffect(screenShaderProgram);
+#ifndef __APPLE__
+  SoundEngine->play2D("C:\\Users\\reh01\\Desktop\\CSE167FinalProject\\CSE-167-FINAL\\CSE167StarterCodeFinal-master\\sound\\s1.mp3", GL_TRUE);
+#endif
 }
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
@@ -314,7 +370,6 @@ void Window::idle_callback()
 
 void Window::display_callback(GLFWwindow* window)
 {
-
 	// Clear the color and depth buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -345,6 +400,10 @@ void Window::render(unsigned int priority) {
   skybox->draw(shader[2]);
   island->draw(shader[0], priority);
   water->draw(shader[1], priority);
+  //boat->orbitY(counter);
+  boat->draw(shader[0]);
+  tree->drawTree(shader[0]);
+  counter++;
 }
 
 void Window::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -378,6 +437,43 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		if (key == GLFW_KEY_ESCAPE) {
 			// do something here if necessary
 		}
+	}
+	if (key == GLFW_KEY_W)
+	{
+		// forward
+		// no angle change, move 
+		float locY = 0.0f;
+		float ang = 0.0f;
+		float locX = 0.0f;
+		float locZ = 1.0f;
+		boat->orbittranslate(locX, locY, locZ, ang);
+	}
+	else if (key == GLFW_KEY_S)
+	{
+		// backward
+		float locY = 0.0f;
+		float ang = 180.0f;
+		float locX = 0.0f;
+		float locZ = -1.0f;
+		boat->orbittranslate(locX, locY, locZ, ang);
+	}
+	else if (key == GLFW_KEY_A)
+	{
+		// left
+		float locY = 0.0f;
+		float ang = 90.0f;
+		float locX = 1.0f;
+		float locZ = 0.0f;
+		boat->orbittranslate(locX, locY, locZ, ang);
+	}
+	else if (key == GLFW_KEY_D)
+	{
+		// right
+		float locY = 0.0f;
+		float ang = -90.0;
+		float locX = -1.0f;
+		float locZ = 0.0f;
+		boat->orbittranslate(locX, locY, locZ, ang);
 	}
 }
 
