@@ -74,21 +74,19 @@ void Skybox::setupSkybox() {
 }
 
 void Skybox::draw(GLuint shaderProgram) {
+  glUseProgram(shaderProgram);
   glm::mat4 view = glm::mat4(glm::mat3(Window::V));
   
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &view[0][0]);
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &(Window::P)[0][0]);
 
   glDepthMask(GL_FALSE);
-
   glBindVertexArray(VAO);
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
 	glUniform1i(glGetUniformLocation(shaderProgram, "skybox"), 0);
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
   glBindVertexArray(0);
-
   glDepthMask(GL_TRUE);
-
 }
 

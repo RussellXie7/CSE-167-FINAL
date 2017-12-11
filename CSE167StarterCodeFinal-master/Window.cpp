@@ -36,8 +36,8 @@ const char * shaderPath[] = {
   "./LowPoly.frag",
   "./Water.vert",
   "./Water.frag",
-  "./Texture.vert",
-  "./Texture.frag"
+  "./skybox.vert",
+  "./skybox.frag"
 };
 
 // Default camera parameters
@@ -68,10 +68,11 @@ void Window::initialize_objects()
   island = new Terrain(20, 1, 1, TerrainGen::getHeight, 
       SphereGen::getHeightLower, TerrainColorGen::getColor);
   water = new LowPolyWater(20, 0.0f, 1); 
-  skybox = new TextureOBJ("../Fantasy/background.obj", "../Fantasy/background.jpg");
+  char* faces[] = {"../skybox/left.jpg", "../skybox/right.jpg", "../skybox/up.jpg", "../skybox/down.jpg", 
+    "../skybox/front.jpg", "../skybox/back.jpg"};
+  std::vector<std::string> fs(faces, faces + 6);
+  skybox = new Skybox(fs);
   skybox->toWorld = glm::scale(glm::mat4(1.0f), glm::vec3(250.0f, 250.0f, 250.0f));
-  std::cout << water->faces.size() << "\n";
-  std::cout << "\n";
 }
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
@@ -235,7 +236,7 @@ void Window::display_callback(GLFWwindow* window)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   // prepare water FBO
-  // water->prepTexture();
+  water->prepTexture();
 
 	// draw with priority 0
   render(0);
@@ -247,9 +248,9 @@ void Window::display_callback(GLFWwindow* window)
 }
 
 void Window::render(unsigned int priority) {
-  // island->draw(shader[0], priority);
-  // water->draw(shader[1], priority);
   skybox->draw(shader[2]);
+  island->draw(shader[0], priority);
+  water->draw(shader[1], priority);
 }
 
 void Window::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)

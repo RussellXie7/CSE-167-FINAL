@@ -20,7 +20,7 @@
 #include <math.h>
 #include <iostream>
 
-#define SIZE 2.0f
+#define SIZE 500.0f
 
 
 class Skybox {
