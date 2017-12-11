@@ -1,11 +1,11 @@
 /**
- * File Name:     LowPolyOBJ.h
+ * File Name:     TextureOBJ.h
  * Author:        Chenxu Jiang
  * Date:          10/03/2017
- * Description:   load obj to have low poly effect
+ * Description:   load obj to with texture
  */
-#ifndef LOWPOLYOBJ_H
-#define LOWPOLYOBJ_H
+#ifndef TEXTUREOBJ_H
+#define TEXTUREOBJ_H
 
 #ifdef __APPLE__
 #include <OpenGL/gl3.h>
@@ -27,25 +27,35 @@
 #include <fstream>
 
 /* need Window::V, Window::P */
-#include "LowPolyPt.h"
 #include "Window.h"
 
-struct LowPolyOBJ {
-  std::function<glm::vec3(glm::vec3, float)> colorFunc;
+struct vertTexPair {
+  glm::vec3 vertex;
+  glm::vec2 tex;
 
-  int inOrOut;              // structure have normal vec point in or out, 1 means out, -1 mean in
+  vertTexPair(glm::vec3, glm::vec2);
+};
+
+struct TextureOBJ {
+
   glm::mat4 toWorld;        // generated vertex should roughly be bounded in box (2 * radius) ^ 3
   GLuint VAO, VBO, EBO;
+  GLuint texture;
 
-  std::vector<vertNormColorPair> vertices;
+  std::vector<vertTexPair> vertices;
   std::vector<int> faces;
 
-  LowPolyOBJ(int, char *, std::function<glm::vec3(glm::vec3, float)>); 
+  TextureOBJ(char *, char *);
 
   void parse(char *);
+  void loadTex(char *);
   void bindVAOVBOEBO();
   void draw(GLuint);
 };
 
 #endif
+
+
+
+
 

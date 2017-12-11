@@ -1,8 +1,3 @@
-#ifndef STB_IMAGE_IMPLEMENTATION    
-#define STB_IMAGE_IMPLEMENTATION    
-#include "stb_image.h"
-#endif
-
 #include "Window.h"
 #include <math.h>
 #include <cstdint>
@@ -19,6 +14,7 @@
 #include "Terrain.h"
 #include "LowPolyOBJ.h"
 #include "LowPolyWater.h"
+#include "Skybox.h"
 
 
 #pragma region Old Declarations
@@ -32,13 +28,16 @@ int Window::shaderNum = 0;
 
 Terrain * island;
 LowPolyWater * water;
+Skybox * skybox;
 
 // On some systems you need to change this to the absolute path
 const char * shaderPath[] = {
   "./LowPoly.vert",
   "./LowPoly.frag",
   "./Water.vert",
-  "./Water.frag"
+  "./Water.frag",
+  "./Texture.vert",
+  "./Texture.frag"
 };
 
 // Default camera parameters
@@ -69,6 +68,8 @@ void Window::initialize_objects()
   island = new Terrain(20, 1, 1, TerrainGen::getHeight, 
       SphereGen::getHeightLower, TerrainColorGen::getColor);
   water = new LowPolyWater(20, 0.0f, 1); 
+  skybox = new TextureOBJ("../Fantasy/background.obj", "../Fantasy/background.jpg");
+  skybox->toWorld = glm::scale(glm::mat4(1.0f), glm::vec3(250.0f, 250.0f, 250.0f));
   std::cout << water->faces.size() << "\n";
   std::cout << "\n";
 }
@@ -234,7 +235,7 @@ void Window::display_callback(GLFWwindow* window)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   // prepare water FBO
-  water->prepTexture();
+  // water->prepTexture();
 
 	// draw with priority 0
   render(0);
@@ -246,8 +247,9 @@ void Window::display_callback(GLFWwindow* window)
 }
 
 void Window::render(unsigned int priority) {
-  island->draw(shader[0], priority);
-  water->draw(shader[1], priority);
+  // island->draw(shader[0], priority);
+  // water->draw(shader[1], priority);
+  skybox->draw(shader[2]);
 }
 
 void Window::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
