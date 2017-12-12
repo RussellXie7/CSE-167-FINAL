@@ -16,6 +16,7 @@
 #include "LowPolyWater.h"
 #include "Skybox.h"
 #include "DofEffect.h"
+#include "SnowEffect.h"
 
 using namespace std;
 
@@ -77,12 +78,14 @@ glm::mat4 Window::V;
 #define SCENE_FRAGMENT_SHADER_PATH "../Shaders/bokeh.frag"
 #endif
 GLint screenShaderProgram;
-bool isDof = true;
+bool isDof = false;
+bool isSnow = true;
 DofEffect* dof_effect;
 LowPolyOBJ* boat;
 LowPolyOBJ* tree;
 LowPolyOBJ* cloud1;
 LowPolyOBJ* cloud2;
+SnowEffect* snow;
 
 #ifndef __APPLE__
 irrklang::ISoundEngine *SoundEngine;
@@ -187,6 +190,8 @@ void Window::initialize_objects()
 #ifndef __APPLE__
   SoundEngine->play2D("../sound/s1.mp3", GL_TRUE);
 #endif
+
+  snow = new SnowEffect();
 }
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
@@ -310,8 +315,8 @@ void Window::cursor_pos_callback(GLFWwindow* window, double xpos, double ypos) {
 		rotation_axis = glm::cross(prev_pos, curr_pos);
 		// if too less time, do not do anything
 		if ((glm::length(curr_pos - prev_pos) > 0.001)) {
-			float x_diff = xpos - old_xpos;
-			float y_diff = ypos - old_ypos;
+			float x_diff = (xpos - old_xpos) * 0.5f;
+			float y_diff = (ypos - old_ypos) * 0.5f;
 
 			if (cam_pos.z < 0) y_diff = -y_diff;
 
@@ -363,8 +368,8 @@ void Window::mouse_button_callback(GLFWwindow* window, int button, int action, i
 }
 
 void Window::scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
-	if (glm::length(glm::vec3(0, 0, 0) - cam_pos) > 20.0f || yoffset > 0)
-		CameraTranslate(-yoffset * 10 * normalize(glm::vec3(0, 0, 0) - cam_pos));
+	if (glm::length(glm::vec3(0, 0, 0) - cam_pos) > 10.0f || yoffset > 0)
+		CameraTranslate(-yoffset * 5 * normalize(glm::vec3(0, 0, 0) - cam_pos));
 }
 
 void Window::resize_callback(GLFWwindow* window, int width, int height)
@@ -406,6 +411,10 @@ void Window::display_callback(GLFWwindow* window)
 		dof_effect->bindFrameBuffer();
 		// Clear the color and depth buffers
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
+
+	if (isSnow) {
+		snow->drawSnow();
 	}
 
 	// draw with priority 0
@@ -456,17 +465,28 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 			glfwSetWindowShouldClose(window, GL_TRUE);
 		}
 		
-	if (key == GLFW_KEY_P) {
-	isDof = !isDof;
-	}
+		if (key == GLFW_KEY_P) {
+		isDof = !isDof;
+		}
 
-	if (key == GLFW_KEY_U) {
-	dof_effect->increase_focus();
-	}
+		if (key == GLFW_KEY_U) {
+		dof_effect->increase_focus();
+		}
 
-	if (key == GLFW_KEY_I) {
-	dof_effect->decrease_focus();
-	}
+		if (key == GLFW_KEY_I) {
+		dof_effect->decrease_focus();
+		}
+		if (key == GLFW_KEY_LEFT)
+			snow->decrease_windDirection();
+		if (key == GLFW_KEY_RIGHT)
+			snow->increase_windDirection();
+		if (key == GLFW_KEY_UP)
+			snow->increase_windSpeed();
+		if (key == GLFW_KEY_DOWN)
+			snow->decrease_windSpeed();
+		if (key == GLFW_KEY_RIGHT_SHIFT) {
+			isSnow = !isSnow;
+		}
 	}
 
 	// when that key is released
