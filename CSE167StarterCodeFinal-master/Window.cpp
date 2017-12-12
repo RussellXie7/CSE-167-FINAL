@@ -289,8 +289,8 @@ void Window::cursor_pos_callback(GLFWwindow* window, double xpos, double ypos) {
 		rotation_axis = glm::cross(prev_pos, curr_pos);
 		// if too less time, do not do anything
 		if ((glm::length(curr_pos - prev_pos) > 0.001)) {
-			float x_diff = xpos - old_xpos;
-			float y_diff = ypos - old_ypos;
+			float x_diff = (xpos - old_xpos) * 0.5f;
+			float y_diff = (ypos - old_ypos) * 0.5f;
 
 			if (cam_pos.z < 0) y_diff = -y_diff;
 
@@ -342,8 +342,8 @@ void Window::mouse_button_callback(GLFWwindow* window, int button, int action, i
 }
 
 void Window::scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
-	if (glm::length(glm::vec3(0, 0, 0) - cam_pos) > 20.0f || yoffset > 0)
-		CameraTranslate(-yoffset * 10 * normalize(glm::vec3(0, 0, 0) - cam_pos));
+	if (glm::length(glm::vec3(0, 0, 0) - cam_pos) > 10.0f || yoffset > 0)
+		CameraTranslate(-yoffset * 5 * normalize(glm::vec3(0, 0, 0) - cam_pos));
 }
 
 void Window::resize_callback(GLFWwindow* window, int width, int height)
