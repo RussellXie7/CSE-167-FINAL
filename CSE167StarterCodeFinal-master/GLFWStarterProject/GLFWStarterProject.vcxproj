@@ -43,6 +43,7 @@
     <ClCompile Include="..\LowPolyWater.cpp" />
     <ClCompile Include="..\main.cpp" />
     <ClCompile Include="..\shader.cpp" />
+    <ClCompile Include="..\Skybox.cpp" />
     <ClCompile Include="..\SkyboxColorGen.cpp" />
     <ClCompile Include="..\SphereGen.cpp" />
     <ClCompile Include="..\Terrain.cpp" />
@@ -53,6 +54,8 @@
   <ItemGroup>
     <None Include="..\LowPoly.frag" />
     <None Include="..\LowPoly.vert" />
+    <None Include="..\skybox.frag" />
+    <None Include="..\skybox.vert" />
     <None Include="..\Water.frag" />
     <None Include="..\Water.vert" />
     <None Include="packages.config" />

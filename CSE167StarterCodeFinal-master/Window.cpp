@@ -159,7 +159,7 @@ void Window::initialize_objects()
   screenShaderProgram = LoadShaders(SCENE_VERTEX_SHADER_PATH, SCENE_FRAGMENT_SHADER_PATH);
   dof_effect = new DofEffect(screenShaderProgram);
 #ifndef __APPLE__
-  SoundEngine->play2D("C:\\Users\\reh01\\Desktop\\CSE167FinalProject\\CSE-167-FINAL\\CSE167StarterCodeFinal-master\\sound\\s1.mp3", GL_TRUE);
+  SoundEngine->play2D("../sound/s1.mp3", GL_TRUE);
 #endif
 }
 
