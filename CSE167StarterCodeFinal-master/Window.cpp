@@ -81,6 +81,8 @@ bool isDof = true;
 DofEffect* dof_effect;
 LowPolyOBJ* boat;
 LowPolyOBJ* tree;
+LowPolyOBJ* cloud1;
+LowPolyOBJ* cloud2;
 
 #ifndef __APPLE__
 irrklang::ISoundEngine *SoundEngine;
@@ -127,6 +129,30 @@ void Window::initialize_objects()
 	tree->scale(8.0f);
 	tree->translate(12.0f, 0.5f, 1.0f);
 	boat->translate(0.0f, -1.75f, 0.0f);
+	auto func3 = [](glm::vec3 vex, float rad) {
+		return glm::vec3(1.0f, 1.0f, 1.0f);
+	};
+	cloud1 = new LowPolyOBJ(1,
+#ifdef __APPLE__
+		"./obj/cloud.obj",
+#else
+		"../obj/cloud.obj",
+#endif
+		func3);
+	cloud2 = new LowPolyOBJ(1,
+#ifdef __APPLE__
+		"./obj/cloud.obj",
+#else
+		"../obj/cloud.obj",
+#endif
+		func3);
+	cloud1->check = 0;
+	cloud2->check = 0;
+	cloud1->translate(-1.0f, 12.0f, 4.0f);
+	cloud2->translate(-7.0f, 10.0f, 4.0f);
+	cloud1->scale(3.0f);
+	cloud2->scale(3.0f);
+
 #ifndef __APPLE__
   SoundEngine = irrklang::createIrrKlangDevice();
   if (!SoundEngine)
@@ -401,9 +427,21 @@ void Window::render(unsigned int priority) {
   island->draw(shader[0], priority);
   water->draw(shader[1], priority);
   //boat->orbitY(counter);
-  boat->draw(shader[0]);
-  tree->drawTree(shader[0]);
+  boat->draw(shader[0], 1);
+  tree->draw(shader[0], 2);
+  cloud1->draw(shader[0], 0);
+  cloud2->draw(shader[0], 0);
   counter++;
+  if (counter % 100 < 50) 
+  {
+	  cloud1->translate(0.0f, 0.01f, 0.0f);
+	  cloud2->translate(0.0f, 0.01f, 0.0f);
+  }
+  else 
+  {
+	  cloud1->translate(0.0f, -0.01f, 0.0f);
+	  cloud2->translate(0.0f, -0.01f, 0.0f);
+  }
 }
 
 void Window::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)

@@ -181,7 +181,7 @@ void LowPolyOBJ::bindVAOVBOEBO() {
   glBindVertexArray(0);
 }
 
-void LowPolyOBJ::draw(GLuint shader) {
+void LowPolyOBJ::draw(GLuint shader, int toon) {
   glm::mat4 modelView = Window::V * toWorld;
 
   glUseProgram(shader);
@@ -194,33 +194,12 @@ void LowPolyOBJ::draw(GLuint shader) {
   glUniform3f(glGetUniformLocation(shader, "camPos"),
       Window::cam_pos.x, Window::cam_pos.y, Window::cam_pos.z);
   glUniform1i(glGetUniformLocation(shader, "toon"),
-	  1);
+	  toon);
 
   glBindVertexArray(VAO);
   glDrawElements(GL_TRIANGLES, faces.size(), GL_UNSIGNED_INT, 0);
   glBindVertexArray(0);
   glUseProgram(0);
-}
-
-void LowPolyOBJ::drawTree(GLuint shader) {
-	glm::mat4 modelView = Window::V * toWorld;
-
-	glUseProgram(shader);
-	glUniformMatrix4fv(glGetUniformLocation(shader, "projection"),
-		1, GL_FALSE, &Window::P[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(shader, "modelview"),
-		1, GL_FALSE, &modelView[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(shader, "model"),
-		1, GL_FALSE, &toWorld[0][0]);
-	glUniform3f(glGetUniformLocation(shader, "camPos"),
-		Window::cam_pos.x, Window::cam_pos.y, Window::cam_pos.z);
-	glUniform1i(glGetUniformLocation(shader, "toon"),
-		2);
-
-	glBindVertexArray(VAO);
-	glDrawElements(GL_TRIANGLES, faces.size(), GL_UNSIGNED_INT, 0);
-	glBindVertexArray(0);
-	glUseProgram(0);
 }
 
 void LowPolyOBJ::orbitY(int counter)

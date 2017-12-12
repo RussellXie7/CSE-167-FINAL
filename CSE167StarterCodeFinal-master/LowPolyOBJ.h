@@ -48,10 +48,9 @@ struct LowPolyOBJ {
 
   void parse(char *);
   void bindVAOVBOEBO();
-  void draw(GLuint);
+  void draw(GLuint, int);
   void translate(float locX, float locY, float locZ);
   void orbitY(int counter);
-  void drawTree(GLuint);
   void scale(float size);
   void orbittranslate(float locX, float locY, float locZ, float ang);
 };
