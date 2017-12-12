@@ -28,6 +28,7 @@
     <ClInclude Include="..\main.h" />
     <ClInclude Include="..\shader.h" />
     <ClInclude Include="..\SkyboxColorGen.h" />
+    <ClInclude Include="..\SnowEffect.h" />
     <ClInclude Include="..\SphereGen.h" />
     <ClInclude Include="..\stb_image.h" />
     <ClInclude Include="..\TerrainColorGen.h" />
@@ -45,6 +46,7 @@
     <ClCompile Include="..\shader.cpp" />
     <ClCompile Include="..\Skybox.cpp" />
     <ClCompile Include="..\SkyboxColorGen.cpp" />
+    <ClCompile Include="..\SnowEffect.cpp" />
     <ClCompile Include="..\SphereGen.cpp" />
     <ClCompile Include="..\Terrain.cpp" />
     <ClCompile Include="..\TerrainColorGen.cpp" />

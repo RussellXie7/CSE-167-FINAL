@@ -16,6 +16,7 @@
 #include "LowPolyWater.h"
 #include "Skybox.h"
 #include "DofEffect.h"
+#include "SnowEffect.h"
 
 using namespace std;
 
@@ -77,10 +78,12 @@ glm::mat4 Window::V;
 #define SCENE_FRAGMENT_SHADER_PATH "../Shaders/bokeh.frag"
 #endif
 GLint screenShaderProgram;
-bool isDof = true;
+bool isDof = false;
+bool isSnow = true;
 DofEffect* dof_effect;
 LowPolyOBJ* boat;
 LowPolyOBJ* tree;
+SnowEffect* snow;
 
 #ifndef __APPLE__
 irrklang::ISoundEngine *SoundEngine;
@@ -161,6 +164,8 @@ void Window::initialize_objects()
 #ifndef __APPLE__
   SoundEngine->play2D("../sound/s1.mp3", GL_TRUE);
 #endif
+
+  snow = new SnowEffect();
 }
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
@@ -382,6 +387,10 @@ void Window::display_callback(GLFWwindow* window)
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
+	if (isSnow) {
+		snow->drawSnow();
+	}
+
 	// draw with priority 0
 	render(0);
 
@@ -418,17 +427,28 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 			glfwSetWindowShouldClose(window, GL_TRUE);
 		}
 		
-	if (key == GLFW_KEY_P) {
-	isDof = !isDof;
-	}
+		if (key == GLFW_KEY_P) {
+		isDof = !isDof;
+		}
 
-	if (key == GLFW_KEY_U) {
-	dof_effect->increase_focus();
-	}
+		if (key == GLFW_KEY_U) {
+		dof_effect->increase_focus();
+		}
 
-	if (key == GLFW_KEY_I) {
-	dof_effect->decrease_focus();
-	}
+		if (key == GLFW_KEY_I) {
+		dof_effect->decrease_focus();
+		}
+		if (key == GLFW_KEY_LEFT)
+			snow->decrease_windDirection();
+		if (key == GLFW_KEY_RIGHT)
+			snow->increase_windDirection();
+		if (key == GLFW_KEY_UP)
+			snow->increase_windSpeed();
+		if (key == GLFW_KEY_DOWN)
+			snow->decrease_windSpeed();
+		if (key == GLFW_KEY_RIGHT_SHIFT) {
+			isSnow = !isSnow;
+		}
 	}
 
 	// when that key is released
