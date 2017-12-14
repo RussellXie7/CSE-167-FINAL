@@ -16,6 +16,7 @@
 #include "LowPolyWater.h"
 #include "Skybox.h"
 #include "DofEffect.h"
+#include "Boat.h"
 
 using namespace std;
 
@@ -31,7 +32,7 @@ int Window::shaderNum = 0;
 Terrain * island;
 LowPolyWater * water;
 Skybox * skybox;
-int counter = 0;
+Boat * boat;
 
 // On some systems you need to change this to the absolute path
 const char * shaderPath[] = {
@@ -79,7 +80,6 @@ glm::mat4 Window::V;
 GLint screenShaderProgram;
 bool isDof = true;
 DofEffect* dof_effect;
-LowPolyOBJ* boat;
 LowPolyOBJ* tree;
 
 #ifndef __APPLE__
@@ -87,8 +87,10 @@ irrklang::ISoundEngine *SoundEngine;
 #endif
 void Window::initialize_objects()
 {
+  island = new Terrain(30, 1, 1, TerrainGen::getHeight, 
+      SphereGen::getHeightLower, TerrainColorGen::getColor);
+
 	auto func1 = [](glm::vec3 vex, float rad) { 
-		
 		if (vex.y < 2.2f) 
 		{
 			return glm::vec3(0.87f, 0.86f, 0.89f);
@@ -98,14 +100,15 @@ void Window::initialize_objects()
 			return glm::vec3(0.988f, 0.29f, 0.10f);
 		}
 	};
-	boat = new LowPolyOBJ(1,
+
+	boat = new Boat(
 #ifdef __APPLE__
 		"./obj/boat.obj",
 #else
 		"../obj/boat.obj",
 #endif
-		func1);
-	boat->check = 1;
+		func1, island);
+
 	auto func2 = [](glm::vec3 vex, float rad) {
 		if (vex.y < 1.0f)
 		{
@@ -123,25 +126,23 @@ void Window::initialize_objects()
     "../obj/tree.obj",
 #endif
 		func2);
+
 	tree->check = 0;
 	tree->scale(8.0f);
-	tree->translate(12.0f, 0.5f, 1.0f);
-	boat->translate(0.0f, -1.75f, 0.0f);
+	tree->translate(12.0f, 0.5f, 10.0f);
 #ifndef __APPLE__
   SoundEngine = irrklang::createIrrKlangDevice();
-  if (!SoundEngine)
-  {
-	cout << "Error in loading the sound engine" << endl;
+  if (!SoundEngine) {
+	  cout << "Error in loading the sound engine" << endl;
   }
 #endif
+
   shaderNum = sizeof(shaderPath) / sizeof(char *) / 2;
   shader = (GLuint *) malloc(shaderNum * sizeof(GLuint));
   for (int i = 0; i < shaderNum; i++) {
     shader[i] = LoadShaders(shaderPath[2 * i], shaderPath[2 * i + 1]);
   }
 
-  island = new Terrain(30, 1, 1, TerrainGen::getHeight, 
-      SphereGen::getHeightLower, TerrainColorGen::getColor);
 
 #ifdef __APPLE__ // Because Apple hates comforming to standards
   char* faces[] = {"../skybox/left.jpg", "../skybox/right.jpg", "../skybox/up.jpg", "../skybox/down.jpg", 
@@ -218,6 +219,8 @@ GLFWwindow* Window::create_window(int width, int height)
 }
 
 void Window::CameraOrbit(float x_diff, float y_diff) {
+  if (!boat->freeCamMove()) return; 
+
 	float offset = 0.3f;
 
 	glm::vec4 cam_pos_vec4 = glm::vec4(cam_pos, 1);
@@ -310,6 +313,8 @@ void Window::cursor_pos_callback(GLFWwindow* window, double xpos, double ypos) {
 
 
 void Window::CameraTranslate(glm::vec3 moveVector) {
+  if (!boat->freeCamMove()) return;
+
 	glm::vec4 cam_pos_vec4 = glm::vec4(cam_pos, 1);
 	cam_pos_vec4 = glm::translate(glm::mat4(1.0f), moveVector) * cam_pos_vec4;
 	cam_pos = glm::vec3(cam_pos_vec4.x, cam_pos_vec4.y, cam_pos_vec4.z);
@@ -360,7 +365,6 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 
 	water->reflection.resize();
 	water->refraction.resize();
-
 }
 
 void Window::idle_callback()
@@ -398,18 +402,17 @@ void Window::display_callback(GLFWwindow* window)
 
 void Window::render(unsigned int priority) {
   skybox->draw(shader[2]);
-  island->draw(shader[0], priority);
-  water->draw(shader[1], priority);
   //boat->orbitY(counter);
   boat->draw(shader[0]);
   tree->drawTree(shader[0]);
-  counter++;
+  island->draw(shader[0], priority);
+  water->draw(shader[1], priority);
 }
 
 void Window::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
 	// Check for a key press
-	if (action == GLFW_PRESS)
+	if (action == GLFW_PRESS || action == GLFW_REPEAT)
 	{
 		// Check if escape was pressed
 		if (key == GLFW_KEY_ESCAPE)
@@ -438,42 +441,22 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 			// do something here if necessary
 		}
 	}
-	if (key == GLFW_KEY_W)
+	if (key == GLFW_KEY_A)
 	{
-		// forward
-		// no angle change, move 
-		float locY = 0.0f;
-		float ang = 0.0f;
-		float locX = 0.0f;
-		float locZ = 1.0f;
-		boat->orbittranslate(locX, locY, locZ, ang);
+		boat->turn(1);
 	}
-	else if (key == GLFW_KEY_S)
+	else if (key == GLFW_KEY_V)
 	{
-		// backward
-		float locY = 0.0f;
-		float ang = 180.0f;
-		float locX = 0.0f;
-		float locZ = -1.0f;
-		boat->orbittranslate(locX, locY, locZ, ang);
+    boat->toggleView();
 	}
-	else if (key == GLFW_KEY_A)
+	else if (key == GLFW_KEY_W)
 	{
-		// left
-		float locY = 0.0f;
-		float ang = 90.0f;
-		float locX = 1.0f;
-		float locZ = 0.0f;
-		boat->orbittranslate(locX, locY, locZ, ang);
+		boat->forward();
 	}
 	else if (key == GLFW_KEY_D)
 	{
 		// right
-		float locY = 0.0f;
-		float ang = -90.0;
-		float locX = -1.0f;
-		float locZ = 0.0f;
-		boat->orbittranslate(locX, locY, locZ, ang);
+		boat->turn(-1);
 	}
 }
 
