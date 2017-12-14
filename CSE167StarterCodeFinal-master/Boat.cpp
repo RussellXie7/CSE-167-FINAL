@@ -22,13 +22,13 @@ Boat::Boat(char * objFile, std::function<glm::vec3(glm::vec3, float)> colorFunc,
 void Boat::forward() {
   if (!viewMode || toggleClock != 0.0f) 
     return;
-  speed += 0.5f;
+  speed += 0.02f;
 }
 
 void Boat::turn(int LoR) {
   if (!viewMode || toggleClock != 0.0f) 
     return;
-  angle += 0.05f * LoR;
+  angle += 0.01f * LoR;
 
   orbit = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f));
   dir = glm::vec3(orbit * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
@@ -76,8 +76,8 @@ void Boat::update() {
   float headZ = (0.4f * head.x * head.z + waveClock * 2.0f * fmod(head.x, 2.0f)) * 2.0f * 3.1416f;
   float sideX = (side.x + side.z * side.x * 0.1f + waveClock * fmod(side.x * 0.8f + side.z, 1.5f)) * 2.0f * 3.1416f;
   float sideZ = (0.4f * side.x * side.z + waveClock * 2.0f * fmod(side.x, 2.0f)) * 2.0f * 3.1416f;
-  int selfX = int(pos.x) + rad;
-  int selfZ = int(pos.z) + rad;
+  int selfX = int(Window::cam_pos.x + dir.x) + rad;
+  int selfZ = int(Window::cam_pos.z + dir.z) + rad;
 
   float headAngle = atan(0.1f * (sin(headX) + cos(headZ)));
   float sideAngle = atan(0.1f * (sin(sideX) + cos(sideZ)));
@@ -86,12 +86,19 @@ void Boat::update() {
       * glm::rotate(glm::mat4(1.0f), sideAngle, dir);
 
   // check collision
-  // float selfY = terrain->vertices[selfZ * 2 * rad + selfX].getCoord().y;
-  float selfY = 3.0f;
-  if (selfY <= 2.0f)
-    dir = glm::normalize(glm::vec3(0.0f, 0.0f, 0.0f) - pos);
+  if (viewMode && toggleClock == 0.0f) {
+    float selfY = terrain->vertices[selfZ * 2 * rad + selfX].getCoord().y;
+    if (selfY > -2.0f) {
+      glm::vec3 xxx =Window::cam_pos;
+      xxx.y = 0.0f;
+      pos += 2 * speed * glm::normalize(glm::vec3(0.0f, 0.0f, 0.0f) - xxx);
+      angle += 3.1416f /2.0f;
+      orbit = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f));
+      dir = glm::vec3(orbit * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
+    }
+  }
 
-  speed -= 0.05f;
+  speed -= 0.001f;
   if (speed < 0.0f)
     speed = 0.0f;
 
