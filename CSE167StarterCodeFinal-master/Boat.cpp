@@ -111,6 +111,6 @@ int Boat::freeCamMove() {
 void Boat::draw(GLuint shader) {
   obj->toWorld = translate * wave * scale * orbit ;
   glm::vec3 worldPos = glm::vec3(obj->toWorld * glm::vec4(pos, 1.0f));
-  obj->draw(shader);
+  obj->draw(shader, 0);
   update();
 }

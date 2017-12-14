@@ -17,6 +17,9 @@
 #include "Skybox.h"
 #include "DofEffect.h"
 #include "Boat.h"
+#ifndef __APPLE__
+#include "SnowEffect.h"
+#endif
 
 using namespace std;
 
@@ -78,9 +81,16 @@ glm::mat4 Window::V;
 #define SCENE_FRAGMENT_SHADER_PATH "../Shaders/bokeh.frag"
 #endif
 GLint screenShaderProgram;
-bool isDof = true;
+bool isDof = false;
+bool isSnow = true;
 DofEffect* dof_effect;
 LowPolyOBJ* tree;
+LowPolyOBJ* cloud1;
+LowPolyOBJ* cloud2;
+#ifndef __APPLE__
+SnowEffect* snow;
+#endif
+int counter = 0;
 
 #ifndef __APPLE__
 irrklang::ISoundEngine *SoundEngine;
@@ -130,6 +140,30 @@ void Window::initialize_objects()
 	tree->check = 0;
 	tree->scale(8.0f);
 	tree->translate(12.0f, 0.5f, 10.0f);
+	auto func3 = [](glm::vec3 vex, float rad) {
+		return glm::vec3(1.0f, 1.0f, 1.0f);
+	};
+	cloud1 = new LowPolyOBJ(1,
+#ifdef __APPLE__
+		"./obj/cloud.obj",
+#else
+		"../obj/cloud.obj",
+#endif
+		func3);
+	cloud2 = new LowPolyOBJ(1,
+#ifdef __APPLE__
+		"./obj/cloud.obj",
+#else
+		"../obj/cloud.obj",
+#endif
+		func3);
+	cloud1->check = 0;
+	cloud2->check = 0;
+	cloud1->translate(-1.0f, 12.0f, 4.0f);
+	cloud2->translate(-7.0f, 10.0f, 4.0f);
+	cloud1->scale(3.0f);
+	cloud2->scale(3.0f);
+
 #ifndef __APPLE__
   SoundEngine = irrklang::createIrrKlangDevice();
   if (!SoundEngine) {
@@ -161,6 +195,7 @@ void Window::initialize_objects()
   dof_effect = new DofEffect(screenShaderProgram);
 #ifndef __APPLE__
   SoundEngine->play2D("../sound/s1.mp3", GL_TRUE);
+  snow = new SnowEffect();
 #endif
 }
 
@@ -287,8 +322,8 @@ void Window::cursor_pos_callback(GLFWwindow* window, double xpos, double ypos) {
 		rotation_axis = glm::cross(prev_pos, curr_pos);
 		// if too less time, do not do anything
 		if ((glm::length(curr_pos - prev_pos) > 0.001)) {
-			float x_diff = xpos - old_xpos;
-			float y_diff = ypos - old_ypos;
+			float x_diff = (xpos - old_xpos) * 0.5f;
+			float y_diff = (ypos - old_ypos) * 0.5f;
 
 			if (cam_pos.z < 0) y_diff = -y_diff;
 
@@ -342,8 +377,8 @@ void Window::mouse_button_callback(GLFWwindow* window, int button, int action, i
 }
 
 void Window::scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
-	if (glm::length(glm::vec3(0, 0, 0) - cam_pos) > 20.0f || yoffset > 0)
-		CameraTranslate(-yoffset * 10 * normalize(glm::vec3(0, 0, 0) - cam_pos));
+	if (glm::length(glm::vec3(0, 0, 0) - cam_pos) > 10.0f || yoffset > 0)
+		CameraTranslate(-yoffset * 5 * normalize(glm::vec3(0, 0, 0) - cam_pos));
 }
 
 void Window::resize_callback(GLFWwindow* window, int width, int height)
@@ -386,6 +421,12 @@ void Window::display_callback(GLFWwindow* window)
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
+#ifndef __APPLE__
+	if (isSnow) {
+		snow->drawSnow();
+	}
+#endif
+
 	// draw with priority 0
 	render(0);
 
@@ -404,9 +445,23 @@ void Window::render(unsigned int priority) {
   skybox->draw(shader[2]);
   //boat->orbitY(counter);
   boat->draw(shader[0]);
-  tree->drawTree(shader[0]);
+  tree->draw(shader[0], 1);
+  cloud1->draw(shader[0], 0);
+  cloud2->draw(shader[0], 0);
   island->draw(shader[0], priority);
   water->draw(shader[1], priority);
+
+  counter++;
+  if (counter % 100 < 50) 
+  {
+	  cloud1->translate(0.0f, 0.01f, 0.0f);
+	  cloud2->translate(0.0f, 0.01f, 0.0f);
+  }
+  else 
+  {
+	  cloud1->translate(0.0f, -0.01f, 0.0f);
+	  cloud2->translate(0.0f, -0.01f, 0.0f);
+  }
 }
 
 void Window::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -421,17 +476,30 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 			glfwSetWindowShouldClose(window, GL_TRUE);
 		}
 		
-	if (key == GLFW_KEY_P) {
-	isDof = !isDof;
-	}
+		if (key == GLFW_KEY_P) {
+		isDof = !isDof;
+		}
 
-	if (key == GLFW_KEY_U) {
-	dof_effect->increase_focus();
-	}
+		if (key == GLFW_KEY_U) {
+		dof_effect->increase_focus();
+		}
 
-	if (key == GLFW_KEY_I) {
-	dof_effect->decrease_focus();
-	}
+		if (key == GLFW_KEY_I) {
+		dof_effect->decrease_focus();
+		}
+#ifndef __APPLE__
+		if (key == GLFW_KEY_LEFT)
+			snow->decrease_windDirection();
+		if (key == GLFW_KEY_RIGHT)
+			snow->increase_windDirection();
+		if (key == GLFW_KEY_UP)
+			snow->increase_windSpeed();
+		if (key == GLFW_KEY_DOWN)
+			snow->decrease_windSpeed();
+		if (key == GLFW_KEY_RIGHT_SHIFT) {
+			isSnow = !isSnow;
+		}
+#endif
 	}
 
 	// when that key is released
