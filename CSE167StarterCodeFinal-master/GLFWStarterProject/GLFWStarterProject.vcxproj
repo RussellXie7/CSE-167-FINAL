@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Boat.h" />
     <ClInclude Include="..\boundingBox.h" />
     <ClInclude Include="..\CameraTexture.h" />
     <ClInclude Include="..\DofEffect.h" />
@@ -36,6 +37,7 @@
     <ClInclude Include="..\Window.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Boat.cpp" />
     <ClCompile Include="..\boundingBox.cpp" />
     <ClCompile Include="..\CameraTexture.cpp" />
     <ClCompile Include="..\DofEffect.cpp" />

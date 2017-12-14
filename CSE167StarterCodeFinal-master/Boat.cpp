@@ -63,7 +63,7 @@ void Boat::update() {
   }
   
   // update orit translate, wave
-  pos += speed * dir;
+  pos += speed * 0.1f * dir;
 
   translate = glm::translate(glm::mat4(1.0f), pos);
 
@@ -91,14 +91,18 @@ void Boat::update() {
     if (selfY > -2.0f) {
       glm::vec3 xxx =Window::cam_pos;
       xxx.y = 0.0f;
-      pos += 2 * speed * glm::normalize(glm::vec3(0.0f, 0.0f, 0.0f) - xxx);
+      pos += 0.2 * speed * glm::normalize(glm::vec3(0.0f, 0.0f, 0.0f) - xxx);
       angle += 3.1416f /2.0f;
-      orbit = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f));
-      dir = glm::vec3(orbit * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
+      //orbit = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f));
+      //dir = glm::vec3(orbit * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
     }
   }
 
-  speed -= 0.001f;
+  if (speed > 0.2) {
+	  speed = 0.2;
+  }
+
+  speed -= 0.005f;
   if (speed < 0.0f)
     speed = 0.0f;
 
