@@ -22,12 +22,12 @@ Find the VisualStudio Solution Folder, open it up and build the solution. After 
 
 ## Built With
 
-* [C++]
+* [C++](http://www.cplusplus.com/) - The primary language used
 * [OpenGL](https://www.opengl.org/) - The library used
 * [Visual Studio](https://visualstudio.microsoft.com/) - IDE used
 
 
-## Authors
+## Development Team
 
 * **Wanze (Russell) Xie** - (https://github.com/russellxie7)
 * **Renxu Hu**
