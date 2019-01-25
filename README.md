@@ -11,11 +11,11 @@ LowPoly ZenGarden is an interactive game demo with beautiful graphics and medita
 
 ### Technical features included in this demo:
 
-* Depth of Field
+* Depth of Field Camera Effect
 * Dynamic Low Poly Water effect with real-time reflection and refraction
 * Snow Particle Effects with wind control
 * Procedurally generated terrain with different levels
-* Depth of Field Camera Effect
+* Animated Clouds
 * Boat Control with Collision Detection
 
 
