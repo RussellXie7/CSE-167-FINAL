@@ -16,7 +16,8 @@ LowPoly ZenGarden is an interactive game demo with beautiful graphics and medita
 * Snow Particle Effects with wind control
 * Procedurally generated terrain with different levels
 * Animated Clouds
-* Boat Control with Collision Detection
+* Boat Control 
+* Collision Detection
 
 
 ## Try it Out
